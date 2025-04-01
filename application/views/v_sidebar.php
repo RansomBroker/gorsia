@@ -139,12 +139,6 @@ $nama_controler = $this->uri->segment('1');
                 </li>
 
                 <li class="menu-item">
-                    <a href="<?= site_url(); ?>?/Pembelian" class="menu-link">
-                        <div data-i18n="Without menu">Pembelian</div>
-                    </a>
-                </li>
-
-                <li class="menu-item">
                     <a href="<?= site_url(); ?>?/Penyewaan" class="menu-link">
                         <div data-i18n="Without menu">Sewa Lapangan</div>
                     </a>
