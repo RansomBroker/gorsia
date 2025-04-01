@@ -14,12 +14,11 @@ class M_harga_paket_sewa extends CI_Model
   #function untuk memanggil sumber data kategori
   public function get_all_kategori()
   {
-    $table = "kategori_olahraga"; #nama_table
-    $this->db->order_by("kategori_olahraga", "asc"); #sortir_data
-    $query = $this->db->get($table);
-    return $query->row();
+      $table = "kategori_olahraga";  #nama_table
+      $this->db->order_by("kategori_olahraga", "asc");  #sortir_data
+      $query = $this->db->get($table);
+      return $query->result();  #mengembalikan semua hasil sebagai array of objects
   }
-
 
   #function untuk memanggil sumber data satuan
   public function get_all_satuan()

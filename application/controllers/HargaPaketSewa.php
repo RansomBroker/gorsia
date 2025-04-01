@@ -51,6 +51,7 @@ class HargaPaketSewa extends CI_Controller{
         $id_kategori_olahraga = $this->input->post('id_kategori_olahraga');
         $id_satuan = $this->input->post('id_satuan');
         $harga = $this->input->post('harga');
+        $harga = str_replace('.', '', $harga);
         $info = $this->input->post('info');
 
         #form to array

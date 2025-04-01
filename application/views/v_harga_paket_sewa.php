@@ -339,5 +339,30 @@ data-template="vertical-menu-template-free"
        else return false;
      }</script>
 
+    <script>
+      // Fungsi untuk menambahkan titik sebagai pemisah ribuan
+      function formatNumber(n) {
+        return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      }
+
+      // Ambil elemen input harga
+      const hargaInput = document.getElementById('harga');
+
+      // Event listener untuk memformat input secara realtime
+      hargaInput.addEventListener('input', function(e) {
+        // Hilangkan semua titik agar bisa diparsing sebagai angka
+        const plainNumber = e.target.value.replace(/\./g, '');
+        // Jika input berupa angka, format kembali dengan pemisah ribuan
+        if(plainNumber) {
+          e.target.value = formatNumber(plainNumber);
+        }
+      });
+
+      // Pastikan sebelum form disubmit, nilai harga dihapus formatting-nya
+      document.getElementById('formHarga').addEventListener('submit', function(e) {
+        hargaInput.value = hargaInput.value.replace(/\./g, '');
+      });
+    </script>
+
    </body>
    </html>
