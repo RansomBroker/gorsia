@@ -105,30 +105,6 @@ data-template="vertical-menu-template-free"
                           <input type="text" class="form-control" id="no_telepon" name="no_telepon" placeholder="Isi no. telepon" required />
                         </div>
 
-                        <div class="mb-3">
-                          <label class="form-label" for="basic-default-fullname">E-mail</label>
-                          <input type="text" class="form-control" id="email" name="email" placeholder="Isi email" />
-                        </div>
-
-                        <div class="mb-3">
-                          <label class="form-label" for="basic-default-fullname">Alamat</label>
-                          <input type="number" class="form-control" id="alamat" name="alamat" placeholder="Isi alamat" />
-                        </div>
-
-                        <div class="mb-3">
-                          <label class="form-label" for="basic-default-fullname">Usia</label>
-                          <input type="number" class="form-control" id="usia" name="usia" placeholder="Isi usia" />
-                        </div>
-
-                        <div class="mb-3">
-                          <label class="form-label" for="basic-default-company">Jenis Kelamin</label>
-                          <select class="form-select" id="jenis_kelamin" name="jenis_kelamin" aria-label="Default select example" required>
-                            <option selected>- - - Pilih - - -</option>
-                            <option value="Laki-laki">Laki-laki</option>
-                            <option value="Perempuan">Perempuan</option>
-                          </select>
-                        </div>
-
                         <button type="submit" class="btn btn-primary">Submit</button>
                       </form>
                     </div>
@@ -154,10 +130,6 @@ data-template="vertical-menu-template-free"
                         <th>ID Member</th>
                         <th>Nama Pelanggan</th>
                         <th>No. Telepon</th>
-                        <th>Email</th>
-                        <th>Alamat</th>
-                        <th>Usia</th>
-                        <th>L/P</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
@@ -170,19 +142,11 @@ data-template="vertical-menu-template-free"
                         $id_member = $row->id_member;
                         $nama_pelanggan = $row->nama_pelanggan;
                         $no_telepon = $row->no_telepon;
-                        $email = $row->email;
-                        $alamat = $row->alamat;
-                        $usia = $row->usia;
-                        $jenis_kelamin = $row->jenis_kelamin;
 
                         echo '<tr>
                       <td>' . $id_member . '</td>
                       <td>' . $nama_pelanggan . '</td>
                       <td>' . $no_telepon . '</td>
-                      <td>' . $email . '</td>
-                      <td>' . $alamat . '</td>
-                      <td>' . $usia . '</td>
-                      <td>' . $jenis_kelamin . '</td>
                       <td align="left">';
                         if ($akses_update == "Aktif") {
 
@@ -226,37 +190,6 @@ data-template="vertical-menu-template-free"
                                   </div>
                                 </div>
 
-                                <div class="row">
-                                  <div class="col mb-3">
-                                    <label for="nameBasic" class="form-label">E-mail</label>
-                                    <input type="text" id="email" name="email" class="form-control" placeholder="Isi E-mail" value="' . $email . '" required="">
-                                  </div>
-                                </div>
-
-                                <div class="row">
-                                  <div class="col mb-3">
-                                    <label for="nameBasic" class="form-label">Alamat</label>
-                                    <input type="text" id="alamat" name="alamat" class="form-control" placeholder="Isi Alamat" value="' . $alamat . '" required="">
-                                  </div>
-                                </div>
-
-                                <div class="row">
-                                  <div class="col mb-3">
-                                    <label for="nameBasic" class="form-label">Usia</label>
-                                    <input type="text" id="usia" name="usia" class="form-control" placeholder="Isi Usia" value="' . $usia . '" required="">
-                                  </div>
-                                </div>
-
-                                <div class="row g-2">
-                                  <div class="col mb-0">
-                                    <label for="emailBasic" class="form-label">Jenis Kelamin</label>
-                                    <select name="jenis_kelamin" id="jenis_kelamin" required="" class="form-select">
-                                    <option value="' . $jenis_kelamin . '">' . $jenis_kelamin . '</option>
-                                    <option value=""> - - - Pilih - - - </option>
-                                    <option value="Laki-laki">Laki-laki</option>
-                                    <option value="Perempuan">Perempuan</option>
-                                    </select>
-                                  </div>
                                   
                                 </div>
                               </div>

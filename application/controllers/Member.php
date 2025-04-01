@@ -49,26 +49,18 @@ class Member extends CI_Controller{
 
         #input text form
         #baca last number
-        $rows_ln = $this->db->query("SELECT MAX(last_number) as last_number FROM member")->row_array();
+        $rows_ln = $this->db->query("SELECT MAX(id) as last_number FROM member")->row_array();
         $last_number=$rows_ln['last_number'];
 
         $id_member = "GORMBR00".$last_number;
         $nama_pelanggan = $this->input->post('nama_pelanggan');
         $no_telepon = $this->input->post('no_telepon');
-        $email = $this->input->post('email');
-        $alamat = $this->input->post('alamat');
-        $usia = $this->input->post('usia');
-        $jenis_kelamin = $this->input->post('jenis_kelamin');
 
         #form to array
         $simpan_data=array(
             'id_member' => $id_member,
             'nama_pelanggan' => $nama_pelanggan, 
             'no_telepon' => $no_telepon, 
-            'email' => $email, 
-            'alamat' => $alamat, 
-            'usia' => $usia, 
-            'jenis_kelamin' => $jenis_kelamin, 
         );
 
         #send to model
@@ -84,19 +76,11 @@ class Member extends CI_Controller{
         $id_member = $this->input->post('id_member');
         $nama_pelanggan = $this->input->post('nama_pelanggan');
         $no_telepon = $this->input->post('no_telepon');
-        $email = $this->input->post('email');
-        $alamat = $this->input->post('alamat');
-        $usia = $this->input->post('usia');
-        $jenis_kelamin = $this->input->post('jenis_kelamin');
-
+    
         #form to array
         $simpan_data=array(
             'nama_pelanggan' => $nama_pelanggan, 
             'no_telepon' => $no_telepon, 
-            'email' => $email, 
-            'alamat' => $alamat, 
-            'usia' => $usia, 
-            'jenis_kelamin' => $jenis_kelamin, 
 
         );
       
