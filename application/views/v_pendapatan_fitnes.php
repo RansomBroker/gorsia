@@ -63,6 +63,42 @@ include_once 'v_user_config.php';
                 <?php echo $this->session->flashdata('msg'); ?>
               </div>
               <div class="table-responsive text-nowrap p-3">
+              <form method="GET" action="<?= site_url('PendapatanFitnes') ?>" class="row g-3 align-items-center mb-2">
+                <div class="col-auto">
+                    <label for="bulan" class="col-form-label">Bulan:</label>
+                </div>
+                <div class="col-auto">
+                    <select name="bulan" id="bulan" class="form-select">
+                        <option value="all" <?= ($selected_bulan == 'all') ? 'selected' : ''; ?>>All</option>
+                        <?php 
+                        for ($i = 1; $i <= 12; $i++) {
+                            $namaBulan = date("F", mktime(0, 0, 0, $i, 10));
+                            $selected = ($i == $selected_bulan) ? 'selected' : '';
+                            echo "<option value='{$i}' {$selected}>{$namaBulan}</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label for="tahun" class="col-form-label">Tahun:</label>
+                </div>
+                <div class="col-auto">
+                    <select name="tahun" id="tahun" class="form-select">
+                        <option value="all" <?= ($selected_tahun == 'all') ? 'selected' : ''; ?>>All</option>
+                        <?php 
+                        $tahunSekarang = date('Y');
+                        for ($tahun = $tahunSekarang - 5; $tahun <= $tahunSekarang; $tahun++) {
+                            $selected = ($tahun == $selected_tahun) ? 'selected' : '';
+                            echo "<option value='{$tahun}' {$selected}>{$tahun}</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
+            </form>
+
                 <table class="table table-hover mt-3 mb-3" id="tabelmember">
                   <thead>
                     <tr>

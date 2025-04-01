@@ -26,24 +26,42 @@ class PendapatanFitnes extends CI_Controller
    #menampilkan halaman utama controller
    public function index()
    {
-      #cek hak akses
-      $rows = $this->db->query("SELECT * FROM user where username='" . $this->session->username . "'")->row_array();
-      $hak_akses = $rows['hak_akses'];
+       // Cek hak akses
+       $rows = $this->db->query("SELECT * FROM user where username='" . $this->session->username . "'")->row_array();
+       $hak_akses = $rows['hak_akses'];
+   
+       // Cek akses menu
+       $rows_hakpengguna = $this->db->query("SELECT * FROM hak_akses where hak_akses='" . $hak_akses . "'")->row_array();
+       $status_menu = $rows_hakpengguna['menu_master'];
+   
+       // Kondisi akses & menu
+       if ($hak_akses != NULL && $status_menu == "Aktif") {
+   
+           // Ambil filter bulan dan tahun dari GET, default ke bulan dan tahun sekarang jika tidak ada
+           $bulan = $this->input->get('bulan') ? $this->input->get('bulan') : date('n');
+           $tahun = $this->input->get('tahun') ? $this->input->get('tahun') : date('Y');
+   
+           // Jika bulan/tahun "All", set sebagai "all" di filter
+           if ($bulan == 'all') {
+               $bulan = 'all';
+           }
+           if ($tahun == 'all') {
+               $tahun = 'all';
+           }
+   
+           // Kirim parameter filter ke model
+           $dataPendapatan = $this->M_pendapatan_fitnes->getAll($bulan, $tahun);
+   
+           $this->load->view('v_pendapatan_fitnes', [
+               'dataPendapatan' => $dataPendapatan,
+               'selected_bulan' => $bulan,
+               'selected_tahun' => $tahun
+           ]);
+       } else {
+           redirect(site_url() . "?/Login");
+       }
+   }
+   
 
-      #cek akses menu
-      $rows_hakpengguna = $this->db->query("SELECT * FROM hak_akses where hak_akses='" . $hak_akses . "'")->row_array();
-      $status_menu = $rows_hakpengguna['menu_master'];
-
-      #kondisi akses & menu
-      if ($hak_akses <> NULL && $status_menu == "Aktif") {
-         //   $data = array('get_all_member' => $this->M_member->get_all_member());
-         $dataPendapatan = $this->M_pendapatan_fitnes->getAll();
-         // var_dump($dataPendapatan);
-         // die;
-         $this->load->view('v_pendapatan_fitnes', ['dataPendapatan' => $dataPendapatan]);
-      } else {
-         redirect(site_url() . "?/Login");
-      }
-   } #end function index
 
 }
