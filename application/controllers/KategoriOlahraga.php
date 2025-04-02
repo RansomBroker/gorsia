@@ -50,11 +50,13 @@ class KategoriOlahraga extends CI_Controller{
         #input text form
         $kategori_olahraga = $this->input->post('kategori_olahraga');
         $memiliki_lapangan = $this->input->post('memiliki_lapangan');
+        $keterangan_lapangan = $this->input->post('keterangan_lapangan');
 
         #form to array
         $simpan_data=array(
             'kategori_olahraga' => $kategori_olahraga,
             'memiliki_lapangan' => $memiliki_lapangan, 
+            'keterangan_lapangan' => $keterangan_lapangan,
         );
 
         #send to model
@@ -70,16 +72,18 @@ class KategoriOlahraga extends CI_Controller{
         $id_kategori_olahraga = $this->input->post('id_kategori_olahraga');
         $kategori_olahraga    = $this->input->post('kategori_olahraga');
         $memiliki_lapangan    = $this->input->post('memiliki_lapangan');
+        $keterangan_lapangan    = $this->input->post('keterangan_lapangan');
 
         #form to array
         $simpan_data=array(
             'kategori_olahraga' => $kategori_olahraga,
-            'memiliki_lapangan' => $memiliki_lapangan, 
+            'memiliki_lapangan' => $memiliki_lapangan,
+            'keterangan_lapangan' => $keterangan_lapangan, 
 
         );
       
         #send to model
-        $this->M_kategori_olahraga->update_data($id_kategori_olahraga, $simpan_data);
+        $this->M_kategori_olahraga->update_data($id_kategori_olahraga, $simpan_data,$keterangan_lapangan);
 
     }
 

@@ -23,7 +23,6 @@ class M_neraca extends CI_Model
     return $query->result();
   }
 
-
   public function get_all_data_akun()
   {
     $table= "kode_akuntansi";

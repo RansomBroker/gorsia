@@ -36,6 +36,7 @@ class M_penyewaan extends CI_Model
     $table= "member_pelanggan"; #nama_table
     $this->db->order_by("nama_pelanggan", "asc"); #sortir_data
     $this->db->where("id_member<>", "NONMEMBER"); #where kondisi
+    // $this->db->where("status", "1"); #where kondisi
     $query = $this->db->get($table);
     return $query->result();
   }
@@ -104,13 +105,53 @@ class M_penyewaan extends CI_Model
     #nama_table
     $this->db->update('transaksi_sewa', $simpan_data); 
     #notifikasi sukses
-    /*$this->session->set_flashdata('msg', '<div class="alert alert-success alert-dismissible" role="alert">
+    $this->session->set_flashdata('msg', '<div class="alert alert-success alert-dismissible" role="alert">
     Sukses Ubah Data !!
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');*/
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+    
    redirect(site_url() . '?/Penyewaan/view/idtrx/'.$id_transaksi);
 
   }
 
+   function update_data_tanggal($id_transaksi, $list_tanggal)
+  {
+    # Delete existing records
+    $this->db->where('id_transaksi', $id_transaksi);
+    $this->db->delete('transaksi_sewa_tanggal');
+
+    # Insert new records
+    foreach ($list_tanggal as $tanggal) {
+      $data = array(
+        'id_transaksi' => $id_transaksi,
+        'tanggal' => $tanggal
+      );
+      $this->db->insert('transaksi_sewa_tanggal', $data);
+    }
+
+  }
+
+  function validasi_data_penyewaan($id_transaksi, $simpan_data)
+  {
+    #kondisi_where_id
+    $this->db->where('id_transaksi', $id_transaksi); 
+    #nama_table
+    $this->db->update('transaksi_sewa', $simpan_data); 
+    #notifikasi sukses
+    $this->session->set_flashdata('msg', '<div class="alert alert-success alert-dismissible" role="alert">
+    Pengajuan diskon berhasil di Validasi !!
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+    
+   redirect(site_url() . '?/PengajuanDiskon');
+
+  }
+
+  function terima_data_penyewaan($id_transaksi, $simpan_data)
+  {
+    #kondisi_where_id
+    $this->db->where('id_transaksi', $id_transaksi); 
+    #nama_table
+    $this->db->update('transaksi_sewa', $simpan_data); 
+  }
 
   function insert_sesi_ke_transaksi($simpan_data_sesi)
  {

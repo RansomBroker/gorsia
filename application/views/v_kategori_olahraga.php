@@ -107,6 +107,11 @@ data-template="vertical-menu-template-free"
                           </select>
                         </div>
 
+                        <div class="mb-3">
+                          <label class="form-label" for="basic-default-fullname">Keterangan lapangan</label>
+                          <input type="text" class="form-control" id="keterangan_lapangan" name="keterangan lapangan" placeholder="Isi Keterangan lapangan" required />
+                        </div>
+
                         <button type="submit" class="btn btn-primary">Submit</button>
                       </form>
                     </div>
@@ -131,6 +136,7 @@ data-template="vertical-menu-template-free"
                       <tr>
                         <th>Kategori Olahraga</th>
                         <th>Memiliki Lapangan ?</th>
+                        <th>Keterangan</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
@@ -151,9 +157,13 @@ data-template="vertical-menu-template-free"
                         $memiliki_lapangan_text = "Ya";
                       }
 
+                      $keterangan_lapangan= $row->keterangan_lapangan;
+
                       echo '<tr>
                       <td>'.$kategori_olahraga.'</td>
                       <td>'.$memiliki_lapangan_text.'</td>
+                      <td>'.$keterangan_lapangan.'</td>
+
                       <td align="left">';
                       if ($akses_update=="Aktif"){
 
@@ -190,6 +200,7 @@ data-template="vertical-menu-template-free"
                                     <option value="0">Tidak</option>
                                     </select>
                                   </div>
+                                </div>
                                   
                                 </div>
                               </div>

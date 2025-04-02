@@ -92,6 +92,7 @@ foreach ($get_data_utama_untuk_cetak as $row_utama) {
   $total      = $row_utama['total'];
   $status_transaksi    = $row_utama['status_transaksi'];
   $created_by    = $row_utama['created_by'];
+  $jenis_bayar    = $row_utama['jenis_bayar'];
 
   $rows_kategori = $this->db->query("SELECT * FROM kategori_olahraga where id_kategori_olahraga='".$id_kategori_olahraga."'")->row_array();
 $kategori_olahraga=$rows_kategori['kategori_olahraga'];
@@ -225,13 +226,24 @@ $html.='<table cellspacing="0" bgcolor="#ffffff" cellpadding="0" border="1">
               
             </tr>';
         }
-
+        
+        $dp = 0;
+        if ($jenis_bayar == 'dp') {
+          $dp = $total_harga/2;
+          $html.='<tr bgcolor="#ffffff">
+            <td align="center"><font size="9"></font></td>
+            <td align="center"><font size="9">&nbsp;</font></td>
+            <td align="right"><font size="9">&nbsp;<b>Total DP&nbsp;&nbsp;</b></font></td>
+            <td align="right"><font size="9"><b>&nbsp;'.number_format($dp,0,",",",").'&nbsp;&nbsp;</b></font></td>
+            
+          </tr>';
+        }
 
         $html.='<tr bgcolor="#ffffff">
               <td align="center"><font size="9"></font></td>
               <td align="center"><font size="9">&nbsp;</font></td>
               <td align="right"><font size="9">&nbsp;<b>Subtotal&nbsp;&nbsp;</b></font></td>
-              <td align="right"><font size="9"><b>&nbsp;'.number_format($total_harga,0,",",",").'&nbsp;&nbsp;</b></font></td>
+              <td align="right"><font size="9"><b>&nbsp;'.number_format($total_harga-$dp,0,",",",").'&nbsp;&nbsp;</b></font></td>
               
             </tr>';
 

@@ -3,6 +3,8 @@ include_once 'v_user_config.php';
 ?>
 
 
+?>
+
 <!DOCTYPE html>
 
 <!-- beautify ignore:start -->
@@ -104,41 +106,6 @@ data-template="vertical-menu-template-free"
                                
 
                                 <div class="table-responsive text-nowrap">
-                                <form method="GET" action="<?= site_url('RekapPenyewaan') ?>" class="row g-3 align-items-center mb-2">
-                                  <div class="col-auto">
-                                      <label for="bulan" class="col-form-label">Bulan:</label>
-                                  </div>
-                                  <div class="col-auto">
-                                      <select name="bulan" id="bulan" class="form-select">
-                                          <option value="all" <?= ($selected_bulan == 'all') ? 'selected' : ''; ?>>All</option>
-                                          <?php 
-                                          for ($i = 1; $i <= 12; $i++) {
-                                                $namaBulan = date("F", mktime(0, 0, 0, $i, 10));
-                                                $selected = ($i == $selected_bulan) ? 'selected' : '';
-                                                echo "<option value='{$i}' {$selected}>{$namaBulan}</option>";
-                                            }
-                                            ?>
-                                        </select>
-                                    </div>
-                                    <div class="col-auto">
-                                        <label for="tahun" class="col-form-label">Tahun:</label>
-                                    </div>
-                                    <div class="col-auto">
-                                        <select name="tahun" id="tahun" class="form-select">
-                                            <option value="all" <?= ($selected_tahun == 'all') ? 'selected' : ''; ?>>All</option>
-                                            <?php 
-                                            $tahunSekarang = date('Y');
-                                            for ($tahun = $tahunSekarang - 5; $tahun <= $tahunSekarang; $tahun++) {
-                                                $selected = ($tahun == $selected_tahun) ? 'selected' : '';
-                                                echo "<option value='{$tahun}' {$selected}>{$tahun}</option>";
-                                            }
-                                            ?>
-                                        </select>
-                                    </div>
-                                    <div class="col-auto">
-                                        <button type="submit" class="btn btn-primary">Filter</button>
-                                    </div>
-                                </form>
                                     <table id="myTable" class="table table-bordered table-striped dataTable no-footer" role="grid" aria-describedby="myTable" style="padding: 5px; font-size: 12px; white-space: nowrap;">
                                         <thead>
                                 <tr role="row">
@@ -202,11 +169,11 @@ data-template="vertical-menu-template-free"
 
                       #paket sewa
                       $rows_paket = $this->db->query("SELECT * FROM paket_sewa where id_paket_sewa='".$id_paket_sewa."'")->row_array();
-                      $id_satuan=$rows_paket['id_satuan'];
+                      $id_satuan=($rows_paket) ? $rows_paket['id_satuan'] : 0;
 
                       #satuan
                       $rows_satuan = $this->db->query("SELECT * FROM satuan_sewa where id_satuan_sewa='".$id_satuan."'")->row_array();
-                      $satuan_sewa=$rows_satuan['satuan_sewa'];
+                      $satuan_sewa=($rows_satuan) ? $rows_satuan['satuan_sewa'] : '';
 
                       #lapangan
                       $rows_lapangan = $this->db->query("SELECT * FROM lapangan where id_lapangan='".$id_lapangan."'")->row_array();

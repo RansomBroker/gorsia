@@ -7,47 +7,49 @@ include_once 'v_user_config.php';
 <html>
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+  />
 
-    <title>Gorsia - Member</title>
+  <title>Gorsia - Member</title>
 
-    <meta name="description" content="" />
+  <meta name="description" content="" />
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="assets/backend/img/favicon/favicon.ico" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="assets/backend/img/favicon/favicon.ico" />
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-        rel="stylesheet" />
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+  href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+  rel="stylesheet"
+  />
 
-    <!-- Icons. Uncomment required icon fonts -->
-    <link rel="stylesheet" href="assets/backend//vendor/fonts/boxicons.css" />
+  <!-- Icons. Uncomment required icon fonts -->
+  <link rel="stylesheet" href="assets/backend//vendor/fonts/boxicons.css" />
 
-    <!-- Core CSS -->
-    <link rel="stylesheet" href="assets/backend/vendor/css/core.css" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="assets/backend/vendor/css/theme-default.css" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="assets/backend/css/demo.css" />
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="assets/backend/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="assets/backend/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="assets/backend/css/demo.css" />
 
-    <!-- Vendors CSS -->
-    <link rel="stylesheet" href="assets/backend/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <!-- Vendors CSS -->
+  <link rel="stylesheet" href="assets/backend/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 
-    <link rel="stylesheet" href="assets/backend/vendor/libs/apex-charts/apex-charts.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap4.css" />
+  <link rel="stylesheet" href="assets/backend/vendor/libs/apex-charts/apex-charts.css" />
 
-    <!-- Page CSS -->
-    <!-- Helpers -->
-    <script src="assets/backend/vendor/js/helpers.js"></script>
+  <!-- Page CSS -->
 
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+  <!-- Helpers -->
+  <script src="assets/backend/vendor/js/helpers.js"></script>
+
+  <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="assets/backend/js/config.js"></script>
-</head>
+  </head>
 
 <body>
     <!-- Layout wrapper -->
@@ -136,11 +138,11 @@ include_once 'v_user_config.php';
                                                                 Paket</label>
                                                             <select class="form-select" id="paketID" name="paketID"
                                                                 aria-label="Default select example" required>
-                                                                <option selected>- - - Pilih - - -</option>
-                                                                <?php foreach ($paketSewa as $key => $value) { ?>
-                                                                <option value="<?= $value['id_paket_sewa'] ?>">
+                                                                <!-- <option>- - - Pilih - - -</option> -->
+                                                                <?php foreach ($paketSewa as $key => $value) { if($value['id_paket_sewa'] == 3) {?>
+                                                                <option selected value="<?= $value['id_paket_sewa'] ?>">
                                                                     <?= $value['namaKategori'] ?></option>
-                                                                <?php } ?>
+                                                                <?php } } ?>
                                                             </select>
                                                         </div>
                                                         <div id="pemayaranqris">

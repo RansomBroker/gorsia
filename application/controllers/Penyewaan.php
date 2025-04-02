@@ -32,10 +32,10 @@ class Penyewaan extends CI_Controller{
 
    #cek akses menu
    $rows_hakpengguna = $this->db->query("SELECT * FROM hak_akses where hak_akses='".$hak_akses."'")->row_array();
-   $status_menu=$rows_hakpengguna['menu_master'];
+   $status_menu=$rows_hakpengguna['menu_master'] == 'Aktif' || $rows_hakpengguna['menu_operasional'] == 'Aktif';
 
    #kondisi akses & menu
-   if($hak_akses<>NULL && $status_menu=="Aktif") {
+   if($hak_akses<>NULL && $status_menu) {
       $data = array('get_all_jadwal_sesi' => $this->M_penyewaan->get_all_jadwal_sesi(), 'get_all_kategori' => $this->M_penyewaan->get_all_kategori(), 'get_all_lapangan' => $this->M_penyewaan->get_all_lapangan());
       $this->load->view('v_penyewaan',$data);
    }
@@ -51,14 +51,21 @@ class Penyewaan extends CI_Controller{
      #cek hak akses
    $rows = $this->db->query("SELECT * FROM user where username='".$this->session->username."'")->row_array();
    $hak_akses=$rows['hak_akses'];
-
+   
    #cek akses menu
    $rows_hakpengguna = $this->db->query("SELECT * FROM hak_akses where hak_akses='".$hak_akses."'")->row_array();
    $status_menu=$rows_hakpengguna['menu_master'];
-
+   
    #kondisi akses & menu
    if($hak_akses<>NULL && $status_menu=="Aktif") {
-      $data = array('get_all_jadwal_sesi' => $this->M_penyewaan->get_all_jadwal_sesi(), 'get_all_kategori' => $this->M_penyewaan->get_all_kategori(), 'get_all_lapangan' => $this->M_penyewaan->get_all_lapangan(), 'get_all_member' => $this->M_penyewaan->get_all_member(), 'get_all_sewa_detil' => $this->M_penyewaan->get_all_sewa_detil());
+      $data = array(
+        'get_all_jadwal_sesi' => $this->M_penyewaan->get_all_jadwal_sesi(),
+        'get_all_kategori' => $this->M_penyewaan->get_all_kategori(), 
+        'get_all_lapangan' => $this->M_penyewaan->get_all_lapangan(), 
+        'get_all_member' => $this->M_penyewaan->get_all_member(), 
+        'get_all_sewa_detil' => $this->M_penyewaan->get_all_sewa_detil(),   
+        'hak_akses' => $hak_akses
+    );
       $this->load->view('v_penyewaan_view_id_trx',$data);
    }
 
@@ -103,34 +110,199 @@ class Penyewaan extends CI_Controller{
 
   #function untuk ambil inputan form untuk update data
   public function update_data_penyewaan(){
-
+    
         #input text form
         $id_transaksi = $this->uri->segment('4');
         $tanggal = $this->input->post('tanggal');
         $nama_pelanggan = $this->input->post('nama_pelanggan');
         $no_telepon = $this->input->post('no_telepon');
         $id_member = $this->input->post('id_member');
+        $diskon = $this->input->post('diskon');
         if($id_member=="NONMEMBER"){
             $member = "Tidak";
         }
         else{
              $member = "Ya";
         }
-
+        
         #form to array
         $simpan_data=array(
-            'tanggal' => $tanggal, 
+            'tanggal' => $tanggal[0], 
             'nama_pelanggan' => $nama_pelanggan, 
             'no_telepon' => $no_telepon, 
             'id_member' => $id_member, 
             'member' => $member, 
+            'diskon' => $diskon, 
         );
-      
+        
         #send to model
+        $this->M_penyewaan->update_data_tanggal($id_transaksi, $tanggal);
         $this->M_penyewaan->update_data_penyewaan($id_transaksi, $simpan_data);
-
     }
 
+    function validasi_data_penyewaan(){
+        #input text form
+        $id_transaksi = $this->input->post('id_transaksi');;
+        $diskon = $this->input->post('diskon');
+
+        #form to array
+        $simpan_data=array(
+            'diskon' => $diskon, 
+            'status_transaksi' => "Validasi"
+        );
+        
+        #send to model
+        $this->M_penyewaan->validasi_data_penyewaan($id_transaksi, $simpan_data);
+    }
+
+    function terima_data_penyewaan(){
+        #input text form
+        $id_transaksi = $this->input->post('id_transaksi');
+
+        #masukan transaksi ke jurnal 
+        #baca aturan
+        $rows = $this->db->query("SELECT * FROM transaksi_sewa where id_transaksi='".$id_transaksi."'")->row_array();
+        $bayar=$rows['metode_bayar'];
+        $jenis=$rows['jenis_bayar'];
+        $id_lapangan=$rows['id_lapangan'];
+        $nama_pelanggan=$rows['nama_pelanggan'];
+        $diskon=$rows['diskon'];
+
+        #baca sumary total detil
+        $rows_total  = $this->db->query("SELECT SUM(harga) as total_harga FROM transaksi_sewa_detil where id_transaksi='".$id_transaksi."'")->row_array();
+        $total_harga=$rows_total['total_harga'];
+
+        #id lapangan
+        $rows_lap = $this->db->query("SELECT * FROM lapangan where id_lapangan='".$id_lapangan."'")->row_array();
+        $nama_lapangan=$rows_lap['nama_lapangan'];
+        
+        if($bayar == "qris"){
+            $query_setting_penjualan = $this->db->query("SELECT * FROM setting_penjualan_terhadap_kode_akuntansi where id_setting=5");
+        }else{
+            $query_setting_penjualan = $this->db->query("SELECT * FROM setting_penjualan_terhadap_kode_akuntansi where id_setting=6");
+        }
+
+        foreach ($query_setting_penjualan->result() as $row_s)
+        {
+            $kode_akun =  $row_s->kode_akun;
+
+            #kode akun
+            $rows_kode_akun  = $this->db->query("SELECT * FROM kode_akuntansi where kode_akun='".$kode_akun."'")->row_array();
+            $id_kode_akuntansi       = $rows_kode_akun['id_kode_akuntansi'];
+
+            $posisi_saldo =  $row_s->posisi_saldo;
+
+            if($posisi_saldo=="Debet"){
+                $debet = $total_harga;
+                $kredit = "0";
+            }
+
+            else{
+                $debet = "0";
+                $kredit = $total_harga;
+            }
+            
+            $tanggal = date('Y-m-d');
+            $no_bukti       = date("Y", strtotime($tanggal));
+            $periode        = date("Ym", strtotime($tanggal));
+            $tanggal_now    = date("dmY", strtotime($tanggal));
+            $kode_jenis_jurnal =  $row_s->kode_jenis_jurnal;
+
+            #read max number
+            $rows_lastnumb  = $this->db->query("SELECT max(last_numb_perperiode) as max_data FROM jurnal_umum where periode='".$periode."'")->row_array();
+            $max_data       = doubleval($rows_lastnumb['max_data']);
+            $last_numb      = $max_data+1;
+
+
+            $no_bukti       = $kode_jenis_jurnal.'00'.$last_numb.'-'.$periode;
+
+            #form input
+            $tanggal_now         = $tanggal;
+            $no_referensi        = $id_transaksi;
+            $dari                = $nama_pelanggan;
+            $kepada              = $_SESSION['username'];
+            $keterangan          = "Hasil Sewa Lapangan ".$nama_lapangan." - ".$id_transaksi;
+            $user_created = $this->session->username;
+            $created_at = date("Y-m-d H:i:s");
+
+            #detail
+            $uraian = $row_s->nama_akun;
+
+            #variabel array
+            $simpan_data_jurnal=array(
+                'periode'               => $periode,
+                'last_numb_perperiode'  => $last_numb,
+                'kode_jenis_jurnal'     => $kode_jenis_jurnal,
+                'no_bukti'              => $no_bukti,
+                'tanggal'               => $tanggal_now,
+                'no_referensi'          => $no_referensi,
+                'dari'                  => $dari,
+                'kepada'                => $kepada,
+                'keterangan'            => $keterangan,
+                'user_created'          => $user_created,
+                'created_at'            => $created_at
+            );
+
+            #send to model
+            $this->M_penyewaan->insert_data_jurnal($simpan_data_jurnal, $no_bukti);
+
+            if($jenis == 'dp') {
+                $debet = $debet / 2;
+                $diskon = $diskon / 2;
+            }
+
+            $simpan_data_jurnal_detail=array(
+                'no_bukti'              => $no_bukti,
+                'uraian'                => $uraian,
+                'id_kode_akuntansi'     => $id_kode_akuntansi,
+                'debet'                 => $debet - $diskon,
+                'kredit'                => $kredit,
+                'user_created'          => $user_created,
+                'created_at'            => $created_at
+            );
+
+            #pengiriman data ke model untuk insert data
+            $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_transaksi);
+
+            if(!empty($diskon)) {
+                $simpan_data_jurnal_detail=array(
+                    'no_bukti'              => $no_bukti,
+                    'uraian'                => 'Biaya Potongan Sewa',
+                    'id_kode_akuntansi'     => $id_kode_akuntansi,
+                    'debet'                 => $diskon,
+                    'kredit'                => $kredit,
+                    'user_created'          => $user_created,
+                    'created_at'            => $created_at
+                );
+    
+                #pengiriman data ke model untuk insert data
+                $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_transaksi);
+            }
+
+            $simpan_data_jurnal_detail=array(
+                'no_bukti'              => $no_bukti,
+                'uraian'                => 'Piutang Sewa Lapangan',
+                'id_kode_akuntansi'     => $id_kode_akuntansi,
+                'debet'                 => 0,
+                'kredit'                => $debet,
+                'user_created'          => $user_created,
+                'created_at'            => $created_at
+            );
+
+            #pengiriman data ke model untuk insert data
+            $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_transaksi);
+        }
+
+        #form to array
+        $simpan_data=array(
+            'status_transaksi' => "Booking"
+        );
+        
+        #send to model
+        $this->M_penyewaan->terima_data_penyewaan($id_transaksi, $simpan_data);
+
+        redirect(site_url() . '?/Penyewaan/view/idtrx/'.$id_transaksi);
+    }
 
  function select_sesi_sewa(){
     $id_trx = $this->uri->segment('4');
@@ -157,58 +329,68 @@ class Penyewaan extends CI_Controller{
     $query_sesi = $this->db->query("SELECT * FROM jadwal_sesi WHERE id_kategori_olahraga ='".$id_kategori_olahraga."' ORDER BY id_jadwal_sesi ASC ");
 
     foreach ($query_sesi->result() as $row)
-        {
+    {
 
-            $id_jadwal_sesi =  $row->id_jadwal_sesi;
+        $id_jadwal_sesi =  $row->id_jadwal_sesi;
 
-            $checklist_check = $this->input->post('txt_check_id_jadwal_sesi_'.$id_jadwal_sesi);
+        $checklist_check = $this->input->post('txt_check_id_jadwal_sesi_'.$id_jadwal_sesi);
 
-             if($checklist_check=="1"){
+            if($checklist_check=="1"){
 
-            $harga = $this->input->post('txt_harga');
-
-
-                 $simpan_data_sesi=array(
-                    'id_transaksi' => $id_trx,
-                    'id_jadwal_sesi' => $id_jadwal_sesi,
-                    'harga' => $harga,
-
-                );
+        $harga = $this->input->post('txt_harga');
 
 
-                  $this->M_penyewaan->insert_sesi_ke_transaksi($simpan_data_sesi);
+                $simpan_data_sesi=array(
+                'id_transaksi' => $id_trx,
+                'id_jadwal_sesi' => $id_jadwal_sesi,
+                'harga' => $harga,
 
-             }
+            );
 
 
+                $this->M_penyewaan->insert_sesi_ke_transaksi($simpan_data_sesi);
+
+            }
+
+
+    }
+
+    #baca sumary total detil
+    $rows_total  = $this->db->query("SELECT SUM(harga) as total_harga FROM transaksi_sewa_detil where id_transaksi='".$id_trx."'")->row_array();
+    $total_harga=$rows_total['total_harga'];
+
+    $rows_lama_sewa  = $this->db->query("SELECT count(id_transaksi_detil) as lama_sewa FROM transaksi_sewa_detil where id_transaksi='".$id_trx."'")->row_array();
+    $lama_sewa=$rows_lama_sewa['lama_sewa'];
+
+
+    #update total harga
+    $diskon = $this->input->post('diskon');
+    $update_data_total=array(
+        'id_paket_sewa' => $id_paket_sewa,
+        'lama_sewa' => $lama_sewa,
+        'harga' => $harga,
+        'total' => $total_harga,
+        'jenis_bayar' => $this->input->post('pembayaran'),
+        'metode_bayar' => $this->input->post('metode_bayar'),
+        'status_transaksi' => ($diskon > 0) ? "Pengajuan Diskon" : "Booking",
+    );
+
+    $this->M_penyewaan->update_total_harga($id_trx, $update_data_total);
+
+    #masukan transaksi ke jurnal 
+    #baca aturan
+    #jika ada diskon, transaksi jurnal saat terima pembayaran
+    if ($diskon == 0) {
+        $bayar = $this->input->post('metode_bayar');
+        $jenis = $this->input->post('pembayaran');
+        if($bayar == "qris"){
+            $query_setting_penjualan = $this->db->query("SELECT * FROM setting_penjualan_terhadap_kode_akuntansi where id_setting=5");
+        }else{
+            $query_setting_penjualan = $this->db->query("SELECT * FROM setting_penjualan_terhadap_kode_akuntansi where id_setting=6");
         }
 
-        #baca sumary total detil
-        $rows_total  = $this->db->query("SELECT SUM(harga) as total_harga FROM transaksi_sewa_detil where id_transaksi='".$id_trx."'")->row_array();
-        $total_harga=$rows_total['total_harga'];
-
-        $rows_lama_sewa  = $this->db->query("SELECT count(id_transaksi_detil) as lama_sewa FROM transaksi_sewa_detil where id_transaksi='".$id_trx."'")->row_array();
-        $lama_sewa=$rows_lama_sewa['lama_sewa'];
-
-
-        #update total harga
-         $update_data_total=array(
-                    'id_paket_sewa' => $id_paket_sewa,
-                    'lama_sewa' => $lama_sewa,
-                    'harga' => $harga,
-                    'total' => $total_harga,
-                    'status_transaksi' => "Booking",
-                );
-
-        $this->M_penyewaan->update_total_harga($id_trx, $update_data_total);
-
-        #masukan transaksi ke jurnal 
-        #baca aturan
-         $query_setting_penjualan = $this->db->query("SELECT * FROM setting_penjualan_terhadap_kode_akuntansi ORDER BY id_setting ASC ");
-
-    foreach ($query_setting_penjualan->result() as $row_s)
+        foreach ($query_setting_penjualan->result() as $row_s)
         {
-
             $kode_akun =  $row_s->kode_akun;
 
             #kode akun
@@ -218,13 +400,13 @@ class Penyewaan extends CI_Controller{
             $posisi_saldo =  $row_s->posisi_saldo;
 
             if($posisi_saldo=="Debet"){
-                $debet = $harga;
+                $debet = $total_harga;
                 $kredit = "0";
             }
 
             else{
                 $debet = "0";
-                $kredit = $harga;
+                $kredit = $total_harga;
             }
 
             $no_bukti       = date("Y", strtotime($tanggal));
@@ -233,7 +415,7 @@ class Penyewaan extends CI_Controller{
             $kode_jenis_jurnal =  $row_s->kode_jenis_jurnal;
 
 
-        #read max number
+            #read max number
             $rows_lastnumb  = $this->db->query("SELECT max(last_numb_perperiode) as max_data FROM jurnal_umum where periode='".$periode."'")->row_array();
             $max_data       = doubleval($rows_lastnumb['max_data']);
             $last_numb      = $max_data+1;
@@ -241,60 +423,88 @@ class Penyewaan extends CI_Controller{
 
             $no_bukti       = $kode_jenis_jurnal.'00'.$last_numb.'-'.$periode;
 
-        #form input
+            #form input
             $tanggal_now         = $tanggal;
             $no_referensi        = $id_trx;
             $dari                = $nama_pelanggan;
-            $kepada              = "KASIR";
-            $keterangan          = "Hasil Sewa Lapangan";
+            $kepada              = $_SESSION['username'];
+            $keterangan          = "Hasil Sewa Lapangan ".$nama_lapangan." - ".$id_trx;
             $user_created = $this->session->username;
             $created_at = date("Y-m-d H:i:s");
 
             #detail
-            $uraian = $kategori_olahraga.' - ' .$nama_lapangan. ' - '.$lama_sewa. ' sesi';
+            $uraian = $row_s->nama_akun;
 
             #variabel array
-        $simpan_data_jurnal=array(
-            'periode'               => $periode,
-            'last_numb_perperiode'  => $last_numb,
-            'kode_jenis_jurnal'     => $kode_jenis_jurnal,
-            'no_bukti'              => $no_bukti,
-            'tanggal'               => $tanggal_now,
-            'no_referensi'          => $no_referensi,
-            'dari'                  => $dari,
-            'kepada'                => $kepada,
-            'keterangan'            => $keterangan,
-            'user_created'          => $user_created,
-            'created_at'            => $created_at
-        );
+            $simpan_data_jurnal=array(
+                'periode'               => $periode,
+                'last_numb_perperiode'  => $last_numb,
+                'kode_jenis_jurnal'     => $kode_jenis_jurnal,
+                'no_bukti'              => $no_bukti,
+                'tanggal'               => $tanggal_now,
+                'no_referensi'          => $no_referensi,
+                'dari'                  => $dari,
+                'kepada'                => $kepada,
+                'keterangan'            => $keterangan,
+                'user_created'          => $user_created,
+                'created_at'            => $created_at
+            );
 
-        #send to model
-        $this->M_penyewaan->insert_data_jurnal($simpan_data_jurnal, $no_bukti);
+            #send to model
+            $this->M_penyewaan->insert_data_jurnal($simpan_data_jurnal, $no_bukti);
 
+            if($jenis == 'dp') {
+                $debet = $debet / 2;
+                $diskon = $diskon / 2;
+            }
 
-         $simpan_data_jurnal_detail=array(
-            'no_bukti'              => $no_bukti,
-            'uraian'                => $uraian,
-            'id_kode_akuntansi'     => $id_kode_akuntansi,
-            'debet'                 => $debet,
-            'kredit'                => $kredit,
-            'user_created'          => $user_created,
-            'created_at'            => $created_at
-        );
+            $simpan_data_jurnal_detail=array(
+                'no_bukti'              => $no_bukti,
+                'uraian'                => $uraian,
+                'id_kode_akuntansi'     => $id_kode_akuntansi,
+                'debet'                 => $debet - $diskon,
+                'kredit'                => $kredit,
+                'user_created'          => $user_created,
+                'created_at'            => $created_at
+            );
 
-         #pengiriman data ke model untuk insert data
+            #pengiriman data ke model untuk insert data
             $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_trx);
 
+            if(!empty($diskon)) {
+                $simpan_data_jurnal_detail=array(
+                    'no_bukti'              => $no_bukti,
+                    'uraian'                => 'Biaya Potongan Sewa',
+                    'id_kode_akuntansi'     => $id_kode_akuntansi,
+                    'debet'                 => $diskon,
+                    'kredit'                => $kredit,
+                    'user_created'          => $user_created,
+                    'created_at'            => $created_at
+                );
+    
+                #pengiriman data ke model untuk insert data
+                $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_trx);
+            }
+
+            $simpan_data_jurnal_detail=array(
+                'no_bukti'              => $no_bukti,
+                'uraian'                => 'Piutang Sewa Lapangan',
+                'id_kode_akuntansi'     => $id_kode_akuntansi,
+                'debet'                 => 0,
+                'kredit'                => $debet,
+                'user_created'          => $user_created,
+                'created_at'            => $created_at
+            );
+
+            #pengiriman data ke model untuk insert data
+            $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_trx);
 
         }
+    }
 
+    redirect(site_url() . '?/Penyewaan/view/idtrx/'.$id_trx);
 
-            redirect(site_url() . '?/Penyewaan/view/idtrx/'.$id_trx);
-
-
-
-
- }
+ }    
 
     #function hapus data
     public function delete_data_sesi()
@@ -322,6 +532,172 @@ class Penyewaan extends CI_Controller{
         $this->M_penyewaan->ubah_status($id_transaksi, $simpan_data);
      }
 
+     public function ubah_status_cancel(){
+
+         #input text form
+        $id_transaksi = $this->uri->segment('4');
+        $status_transaksi = "Cancel";
+
+        #form to array
+        $simpan_data=array(
+            'status_transaksi' => $status_transaksi, 
+        );
+        
+        #baca sumary total detil
+        $rows_total  = $this->db->query("SELECT SUM(harga) as total_harga FROM transaksi_sewa_detil where id_transaksi='".$id_transaksi."'")->row_array();
+        $rows_data  = $this->db->query("SELECT * FROM transaksi_sewa where id_transaksi='".$id_transaksi."'")->row_array();
+        
+        $total_harga=$rows_total['total_harga'];
+        $jenis = $rows_data['jenis_bayar'];
+        $diskon = $rows_data['diskon'];
+        $bayar = $rows_data['metode_bayar'];
+        $tanggal = $rows_data['tanggal'];
+        $id_trx = $id_transaksi;
+        $nama_pelanggan = $this->input->post('nama_pelanggan');
+        
+        $query_setting_penjualan = $this->db->query("SELECT * FROM setting_penjualan_terhadap_kode_akuntansi where id_setting=7");
+
+        foreach ($query_setting_penjualan->result() as $row_s)
+        {
+            $kode_akun =  $row_s->kode_akun;
+
+            #kode akun
+            $rows_kode_akun  = $this->db->query("SELECT * FROM kode_akuntansi where kode_akun='".$kode_akun."'")->row_array();
+            $id_kode_akuntansi       = $rows_kode_akun['id_kode_akuntansi'];
+
+            $posisi_saldo =  $row_s->posisi_saldo;
+
+            if($posisi_saldo=="Debet"){
+                $debet = $total_harga;
+                $kredit = "0";
+            } else{
+                $debet = "0";
+                $kredit = $total_harga;
+            }
+
+            $no_bukti       = date("Y", strtotime($tanggal));
+            $periode        = date("Ym", strtotime($tanggal));
+            $tanggal_now    = date("dmY", strtotime($tanggal));
+            $kode_jenis_jurnal =  $row_s->kode_jenis_jurnal;
+
+
+            #read max number
+            $rows_lastnumb  = $this->db->query("SELECT max(last_numb_perperiode) as max_data FROM jurnal_umum where periode='".$periode."'")->row_array();
+            $max_data       = doubleval($rows_lastnumb['max_data']);
+            $last_numb      = $max_data+1;
+
+
+            $no_bukti       = $kode_jenis_jurnal.'00'.$last_numb.'-'.$periode;
+
+            #form input
+            $tanggal_now         = $tanggal;
+            $no_referensi        = $id_trx;
+            $dari                = $nama_pelanggan;
+            $kepada              = $_SESSION['username'];
+            $keterangan          = "Pembatalan Sewa Lapangan ".$nama_lapangan." - ".$id_trx;
+            $user_created = $this->session->username;
+            $created_at = date("Y-m-d H:i:s");
+
+            #detail
+            $uraian = $row_s->nama_akun;
+
+            #variabel array
+            $simpan_data_jurnal=array(
+                'periode'               => $periode,
+                'last_numb_perperiode'  => $last_numb,
+                'kode_jenis_jurnal'     => $kode_jenis_jurnal,
+                'no_bukti'              => $no_bukti,
+                'tanggal'               => $tanggal_now,
+                'no_referensi'          => $no_referensi,
+                'dari'                  => $dari,
+                'kepada'                => $kepada,
+                'keterangan'            => $keterangan,
+                'user_created'          => $user_created,
+                'created_at'            => $created_at
+            );
+
+            #send to model
+            $this->M_penyewaan->insert_data_jurnal($simpan_data_jurnal, $no_bukti);
+
+            if($jenis == 'dp') {
+                $total_harga = $total_harga / 2;
+                $diskon = $diskon / 2;
+            }
+
+            $simpan_data_jurnal_detail=array(
+                'no_bukti'              => $no_bukti,
+                'uraian'                => 'Piutang Sewa Lapangan',
+                'id_kode_akuntansi'     => $id_kode_akuntansi,
+                'debet'                 => $total_harga,
+                'kredit'                => 0,
+                'user_created'          => $user_created,
+                'created_at'            => $created_at
+            );
+
+            #pengiriman data ke model untuk insert data
+            $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_trx);
+
+            if($jenis == 'lunas') {
+                $total_harga = $total_harga / 2;
+            }
+
+            $simpan_data_jurnal_detail=array(
+                'no_bukti'              => $no_bukti,
+                'uraian'                => 'Pendapatan Cancel Sewa Lapangan',
+                'id_kode_akuntansi'     => $id_kode_akuntansi,
+                'debet'                 => 0,
+                'kredit'                => $total_harga - ($diskon / 2),
+                'user_created'          => $user_created,
+                'created_at'            => $created_at
+            );
+
+            #pengiriman data ke model untuk insert data
+            $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_trx);
+
+            if($jenis == 'lunas') {
+                if($bayar == "qris") {
+                    $setting = $this->db->query("SELECT * FROM setting_penjualan_terhadap_kode_akuntansi where id_setting=5")->row_array();
+                } else {
+                    $setting = $this->db->query("SELECT * FROM setting_penjualan_terhadap_kode_akuntansi where id_setting=6")->row_array();
+                }
+                
+                $simpan_data_jurnal_detail=array(
+                    'no_bukti'              => $no_bukti,
+                    'uraian'                => $setting['nama_akun'],
+                    'id_kode_akuntansi'     => $id_kode_akuntansi,
+                    'debet'                 => 0,
+                    'kredit'                => $total_harga - ($diskon / 2),
+                    'user_created'          => $user_created,
+                    'created_at'            => $created_at
+                );
+
+                #pengiriman data ke model untuk insert data
+                $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_trx);
+            }
+
+            if(!empty($diskon)) {
+                $simpan_data_jurnal_detail=array(
+                    'no_bukti'              => $no_bukti,
+                    'uraian'                => 'Biaya Potongan Sewa',
+                    'id_kode_akuntansi'     => $id_kode_akuntansi,
+                    'debet'                 => 0,
+                    'kredit'                => $diskon,
+                    'user_created'          => $user_created,
+                    'created_at'            => $created_at
+                );
+    
+                #pengiriman data ke model untuk insert data
+                $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_trx);
+            }
+
+        }
+
+      
+        #send to model
+        $this->M_penyewaan->ubah_status($id_transaksi, $simpan_data);
+
+     }
+
      public function ubah_status_selesai(){
 
          #input text form
@@ -332,9 +708,164 @@ class Penyewaan extends CI_Controller{
         $simpan_data=array(
             'status_transaksi' => $status_transaksi, 
         );
+
+        #baca sumary total detil
+        $rows_total  = $this->db->query("SELECT SUM(harga) as total_harga FROM transaksi_sewa_detil where id_transaksi='".$id_transaksi."'")->row_array();
+        $rows_data  = $this->db->query("SELECT * FROM transaksi_sewa where id_transaksi='".$id_transaksi."'")->row_array();
+        
+        $total_harga=$rows_total['total_harga'];
+        $jenis = $rows_data['jenis_bayar'];
+        $diskon = $rows_data['diskon'];
+        $bayar = $rows_data['metode_bayar'];
+        $tanggal = $rows_data['tanggal'];
+        $id_trx = $id_transaksi;
+        $nama_pelanggan = ($jenis == 'dp') ? $this->input->post('dp_nama_pelanggan') : $this->input->post('nama_pelanggan');
+        
+        $query_setting_penjualan = $this->db->query("SELECT * FROM setting_penjualan_terhadap_kode_akuntansi where id_setting=1");
+
+        foreach ($query_setting_penjualan->result() as $row_s)
+        {
+            $kode_akun =  $row_s->kode_akun;
+
+            #kode akun
+            $rows_kode_akun  = $this->db->query("SELECT * FROM kode_akuntansi where kode_akun='".$kode_akun."'")->row_array();
+            $id_kode_akuntansi       = $rows_kode_akun['id_kode_akuntansi'];
+
+            $posisi_saldo =  $row_s->posisi_saldo;
+
+            if($posisi_saldo=="Debet"){
+                $debet = $total_harga;
+                $kredit = "0";
+            } else{
+                $debet = "0";
+                $kredit = $total_harga;
+            }
+
+            $no_bukti       = date("Y", strtotime($tanggal));
+            $periode        = date("Ym", strtotime($tanggal));
+            $tanggal_now    = date("dmY", strtotime($tanggal));
+            $kode_jenis_jurnal =  $row_s->kode_jenis_jurnal;
+
+
+            #read max number
+            $rows_lastnumb  = $this->db->query("SELECT max(last_numb_perperiode) as max_data FROM jurnal_umum where periode='".$periode."'")->row_array();
+            $max_data       = doubleval($rows_lastnumb['max_data']);
+            $last_numb      = $max_data+1;
+
+            $no_bukti       = $kode_jenis_jurnal.'00'.$last_numb.'-'.$periode;
+
+            #form input
+            $tanggal_now         = $tanggal;
+            $no_referensi        = $id_trx;
+            $dari                = $nama_pelanggan;
+            $kepada              = $_SESSION['username'];
+            $keterangan          = "Pendapatan Sewa Lapangan ".$nama_lapangan." - ".$id_trx;
+            $user_created = $this->session->username;
+            $created_at = date("Y-m-d H:i:s");
+
+            #detail
+            $uraian = $row_s->nama_akun;
+
+            #variabel array
+            $simpan_data_jurnal=array(
+                'periode'               => $periode,
+                'last_numb_perperiode'  => $last_numb,
+                'kode_jenis_jurnal'     => $kode_jenis_jurnal,
+                'no_bukti'              => $no_bukti,
+                'tanggal'               => $tanggal_now,
+                'no_referensi'          => $no_referensi,
+                'dari'                  => $dari,
+                'kepada'                => $kepada,
+                'keterangan'            => $keterangan,
+                'user_created'          => $user_created,
+                'created_at'            => $created_at
+            );
+
+            #send to model
+            $this->M_penyewaan->insert_data_jurnal($simpan_data_jurnal, $no_bukti);
+
+            if($jenis == 'dp') {
+                $total_harga = $total_harga / 2;
+                $diskon = $diskon / 2;
+            }
+
+            $simpan_data_jurnal_detail=array(
+                'no_bukti'              => $no_bukti,
+                'uraian'                => 'Piutang Sewa Lapangan',
+                'id_kode_akuntansi'     => $id_kode_akuntansi,
+                'debet'                 => $total_harga,
+                'kredit'                => 0,
+                'user_created'          => $user_created,
+                'created_at'            => $created_at
+            );
+
+            #pengiriman data ke model untuk insert data
+            $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_trx);
+
+            if($jenis == 'dp') {
+                $total_harga = $total_harga * 2;
+            }
+
+            $simpan_data_jurnal_detail=array(
+                'no_bukti'              => $no_bukti,
+                'uraian'                => 'Pendapatan Sewa Lapangan',
+                'id_kode_akuntansi'     => $id_kode_akuntansi,
+                'debet'                 => 0,
+                'kredit'                => $total_harga,
+                'user_created'          => $user_created,
+                'created_at'            => $created_at
+            );
+
+            #pengiriman data ke model untuk insert data
+            $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_trx);
+
+            if($jenis != 'lunas') {
+                $bayar=$this->input->post('dp_metode_bayar');
+                if($bayar == "qris") {
+                    $setting = $this->db->query("SELECT * FROM setting_penjualan_terhadap_kode_akuntansi where id_setting=5")->row_array();
+
+                } else {
+                    $setting = $this->db->query("SELECT * FROM setting_penjualan_terhadap_kode_akuntansi where id_setting=6")->row_array();
+                }
+                
+                if($jenis == 'dp') {
+                    $total_harga = $total_harga / 2;
+                }
+
+                $simpan_data_jurnal_detail=array(
+                    'no_bukti'              => $no_bukti,
+                    'uraian'                => $setting['nama_akun'],
+                    'id_kode_akuntansi'     => $id_kode_akuntansi,
+                    'debet'                 => $total_harga - $diskon,
+                    'kredit'                => 0,
+                    'user_created'          => $user_created,
+                    'created_at'            => $created_at
+                );
+
+                #pengiriman data ke model untuk insert data
+                $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_trx);
+            }
+
+            if($jenis != 'lunas' && !empty($diskon)) {
+                $simpan_data_jurnal_detail=array(
+                    'no_bukti'              => $no_bukti,
+                    'uraian'                => 'Biaya Potongan Sewa',
+                    'id_kode_akuntansi'     => $id_kode_akuntansi,
+                    'debet'                 => $diskon,
+                    'kredit'                => 0,
+                    'user_created'          => $user_created,
+                    'created_at'            => $created_at
+                );
+    
+                #pengiriman data ke model untuk insert data
+                $this->M_penyewaan->insert_data_detail_jurnal($simpan_data_jurnal_detail, $no_bukti, $id_trx);
+            }
+
+        }
       
         #send to model
         $this->M_penyewaan->ubah_status($id_transaksi, $simpan_data);
+
      }
 
 

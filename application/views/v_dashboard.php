@@ -97,7 +97,7 @@ include_once 'v_user_config.php';
                     <div class="d-flex align-items-end row">
                       <div class="col-sm-7">
                         <div class="card-body">
-                          <h5 class="card-title text-primary">Hai, Admin! 🎉</h5>
+                          <h5 class="card-title text-primary">Hai, <?=ucwords($this->session->nama_lengkap) ?>! 🎉</h5>
                           <p class="mb-4">
                             Selamat datang pada sistem informasi akuntansi persewaan gedung olahraga.
                           </p>

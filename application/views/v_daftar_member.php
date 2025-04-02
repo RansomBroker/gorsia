@@ -47,10 +47,9 @@ data-template="vertical-menu-template-free"
   <link rel="stylesheet" href="assets/backend/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 
   <link rel="stylesheet" href="assets/backend/vendor/libs/apex-charts/apex-charts.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css" />
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap4.css" />
 
   <!-- Page CSS -->
+
   <!-- Helpers -->
   <script src="assets/backend/vendor/js/helpers.js"></script>
 
@@ -91,8 +90,9 @@ data-template="vertical-menu-template-free"
 						<!-- <th>Metode Bayar</th>
 						<th>Tanggal Mulai</th>
 						<th>Expired Member</th> -->
+            <th>Nomor Telepon</th>
             <th>Expired Member</th>
-            <!-- <th>Status Member</th> -->
+            <th>Status Member</th>
 						<th>Aksi</th>
 						</tr>
 					</thead>
@@ -107,12 +107,15 @@ data-template="vertical-menu-template-free"
             <!-- <td><?= $value['metode_bayar'] ?></td>
             <td><?= $value['tanggal_mulai'] ?></td>
             <td><?= $value['expired']; ?></td> -->
+            <td><?= $value['nope']; ?></td>
             <td><?= isset($value['expired_member']) ? $value['expired_member'] : '-'; ?></td>
-            <!-- <td>
-            <?php if ($value['expired_member'] == date('Y-m-d')) { ?>
-                                <span class="badge bg-danger">Expired</span>
-                               <?php } else {  ?> <span class="badge bg-success"> <?= date('Y-m-d') ?>Aktif</span><?php } ?>
-            </td> -->
+            <td>
+            <?php if (strtotime($value['expired_member']) <= strtotime(date('Y-m-d'))) { ?>
+              <span class="badge bg-danger">Non Aktif</span>
+            <?php } else {  ?> 
+              <span class="badge bg-success">Aktif</span>
+            <?php } ?>
+            </td>
             <td>
               <a  href="<?php echo base_url() . "?/DaftarMember/perpanjangMember/$value[id]" ?>"><span class="badge bg-info">Perpanjang</span> </a>
               <a  href="<?php echo base_url() . "?/DaftarMember/show/$value[id]" ?>"><span class="badge bg-primary">Histori</span> </a>

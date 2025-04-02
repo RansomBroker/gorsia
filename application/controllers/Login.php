@@ -59,10 +59,14 @@ class Login extends CI_Controller{
 		$cek = $this->M_login->cek_login("user",$where)->num_rows();
 
 		if($cek > 0){
+
+			$rows = $this->db->query("SELECT * FROM user where username='".$username."'")->row_array();
  
 			$data_session = array(
 				'username' => $username,
 				'password' => $password,
+				'hak_akses' => $rows['hak_akses'],
+				'nama_lengkap' => $rows['nama_lengkap'],
 				'status' => "login"
 				);
 			
@@ -70,7 +74,6 @@ class Login extends CI_Controller{
 			$this->session->set_userdata($data_session);
 
 			#untuk mengambil data hak akses
-			$rows = $this->db->query("SELECT * FROM user where username='".$this->session->username."'")->row_array();
 			$hak_akses=$rows['hak_akses'];
 			$status=$rows['status'];
 

@@ -31,13 +31,13 @@ class LabaRugi extends CI_Controller{
 
    #cek akses menu
    $rows_hakpengguna = $this->db->query("SELECT * FROM hak_akses where hak_akses='".$hak_akses."'")->row_array();
-   $status_menu=$rows_hakpengguna['menu_master'];
+   $status_menu=$rows_hakpengguna['menu_master'] == 'Aktif' || $rows_hakpengguna['menu_akuntansi'] == 'Aktif';
 
    #kondisi akses & menu
-   if($hak_akses<>NULL && $status_menu=="Aktif") {
+   if($hak_akses<>NULL && $status_menu) {
       $data = array('get_all_data_akun' => $this->M_laba_rugi->get_all_data_akun(),
       'get_all_parent_akun_laba_rugi' => $this->M_laba_rugi->get_all_parent_akun_laba_rugi(),);
-      $this->load->view('v_laba_rugi',$data);
+      $this->load->view('v_laba_rugi_new',$data);
    }
 
    else{
@@ -57,7 +57,7 @@ $param_periode = $param_tahun.$param_bulan;
          'get_all_data_akun' => $this->M_laba_rugi->get_all_data_akun(),
          'get_all_parent_akun_laba_rugi' => $this->M_laba_rugi->get_all_parent_akun_laba_rugi(),
       );
-    $this->load->view('v_laba_rugi',$data);
+    $this->load->view('v_laba_rugi_new',$data);
 
     }
 

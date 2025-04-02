@@ -22,38 +22,28 @@ class RekapPenyewaan extends CI_Controller{
 
 
 	#menampilkan halaman utama controller
-	public function index()
-    {
-        // Cek hak akses user
-        $rows = $this->db->query("SELECT * FROM user where username='".$this->session->username."'")->row_array();
-        $hak_akses = $rows['hak_akses'];
+	public function index(){
+ 	 #cek hak akses
+   $rows = $this->db->query("SELECT * FROM user where username='".$this->session->username."'")->row_array();
+   $hak_akses=$rows['hak_akses'];
 
-        // Cek akses menu
-        $rows_hakpengguna = $this->db->query("SELECT * FROM hak_akses where hak_akses='".$hak_akses."'")->row_array();
-        $status_menu = $rows_hakpengguna['menu_master'];
+   #cek akses menu
+   $rows_hakpengguna = $this->db->query("SELECT * FROM hak_akses where hak_akses='".$hak_akses."'")->row_array();
+   $status_menu=$rows_hakpengguna['menu_master'] == 'Aktif' || $rows_hakpengguna['menu_operasional'] == 'Aktif';
 
-        // Jika user memiliki hak akses dan menu aktif
-        if($hak_akses != NULL && $status_menu == "Aktif") {
-            // Ambil filter bulan dan tahun dari GET, default ke bulan dan tahun berjalan jika tidak ada
-            $bulan = $this->input->get('bulan') ? $this->input->get('bulan') : date('n'); // Bulan saat ini sebagai default
-            $tahun = $this->input->get('tahun') ? $this->input->get('tahun') : date('Y'); // Tahun saat ini sebagai default
+   #kondisi akses & menu
+   if($hak_akses<>NULL && $status_menu) {
+      $data = array('get_all_rekap_penyewaan' => $this->M_rekap_penyewaan->get_all_rekap_penyewaan(), 'get_all_kategori' => $this->M_rekap_penyewaan->get_all_kategori());
+      $this->load->view('v_rekap_penyewaan',$data);
+   }
 
-            // Kirim parameter filter ke model
-            $data = array(
-                'get_all_rekap_penyewaan' => $this->M_rekap_penyewaan->get_all_rekap_penyewaan($bulan, $tahun),
-                'get_all_kategori'        => $this->M_rekap_penyewaan->get_all_kategori(),
-                'selected_bulan'          => $bulan,
-                'selected_tahun'          => $tahun
-            );
-            
-            $this->load->view('v_rekap_penyewaan', $data);
-        } else {
-            redirect(site_url()."?/Login");
-        }
-    }
+   else{
+      redirect(site_url()."?/Login");
+   }
+
+	}#end function index
 
 
-  
 
     #function hapus data
     public function delete_data()

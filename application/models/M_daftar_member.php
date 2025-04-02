@@ -49,6 +49,7 @@ class M_daftar_member extends CI_Model
         $data = ['status' => true, 'IdSimpan' => $this->db->insert_id()];
         return $data;
     }
+    
     public function simpanDataDetail($kodeTransaksi, $hargaPaket)
     {
         $durasiMember = $_POST['durasi_member'];
@@ -151,6 +152,15 @@ class M_daftar_member extends CI_Model
     public function cekkotransaksi()
     {
         $query = $this->db->query("SELECT MAX(nomorTransaksi) as kodeTransaksi from member_trx");
+        $hasil = $query->row();
+        // var_dump($hasil);
+        // die;cekkotransaksi
+        return $hasil->kodeTransaksi;
+    }
+
+    public function cekidtransaksi()
+    {
+        $query = $this->db->query("SELECT MAX(id) as kodeTransaksi from member_trx");
         $hasil = $query->row();
         // var_dump($hasil);
         // die;cekkotransaksi

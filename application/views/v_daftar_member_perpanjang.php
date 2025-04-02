@@ -71,44 +71,53 @@ include_once 'v_user_config.php';
                                             <form method="post" action="<?= base_url() ?>?/DaftarMember/update/<?= $idMember ?>">
                                                 <div class="row">
                                                     <div class="col-6">
-                                                        <input type="hidden" class="form-control" id="idSimpan" name="idSimpan" value="<?= $idMember ?>" />
                                                         <div class="mb-3">
-                                                            <label class="form-label" for="basic-default-fullname">Durasi Member</label>
-                                                            <select class="form-select" id="durasi_member" name="durasi_member" aria-label="Default select example" required>
+                                                            <label class="form-label" for="basic-default-company">Pilih
+                                                                Paket</label>
+                                                            <select class="form-select" id="paketID" name="paketID"
+                                                                aria-label="Default select example" required>
+                                                                <!-- <option>- - - Pilih - - -</option> -->
+                                                                <?php foreach ($paketSewa as $key => $value) { if($value['id_paket_sewa'] == 3) {?>
+                                                                <option selected value="<?= $value['id_paket_sewa'] ?>">
+                                                                    <?= $value['namaKategori'] ?></option>
+                                                                <?php } } ?>
+                                                            </select>
+                                                        </div>
+                                                        <div id="pemayaranqris">
+                                                            <div class="mb-3">
+                                                                <label class="form-label"
+                                                                    for="basic-default-fullname">Metode
+                                                                    Bayar</label><br>
+                                                                <input class="radiopilih" type="radio" id="qrismerchant"
+                                                                    name="metode_bayar" value="qris">
+                                                                <label for="vehicle1"> Qris Merchant</label><br>
+                                                                <input class="radiopilih" type="radio"
+                                                                    id="qrispendapatan" name="metode_bayar"
+                                                                    value="cash">
+                                                                <label for="qrispendapatan"> Cash</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label"
+                                                                for="basic-default-fullname">Durasi Member</label>
+                                                            <select class="form-select" id="durasi_member"
+                                                                name="durasi_member" aria-label="Default select example"
+                                                                required>
                                                                 <option selected>- - - Pilih - - -</option>
                                                                 <option value="30">1 Bulan</option>
                                                                 <option value="60">2 Bulan</option>
                                                                 <option value="90">3 Bulan</option>
                                                             </select>
                                                         </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label" for="basic-default-company">Pilih
-                                                                Paket</label>
-                                                            <select class="form-select" id="paketID" name="paketID" aria-label="Default select example" required>
-                                                                <option selected>- - - Pilih - - -</option>
-                                                                <?php foreach ($paketSewa as $key => $value) { ?>
-                                                                    <option value="<?= $value['id_paket_sewa'] ?>">
-                                                                        <?= $value['namaKategori'] ?></option>
-                                                                <?php } ?>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-6">
-                                                        <div class="row">
-                                                            <div class="col-12">
-                                                                <div class="mb-3" id="totalbayarAll">
-                                                                    <label class="form-label" for="basic-default-fullname">Tanggal
-                                                                        Mulai</label>
-                                                                    <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label" for="basic-default-fullname">Metode Bayar</label><br>
-                                                            <input class="radiopilih" type="radio" id="qrismerchant" name="metode_bayar" value="qris merchant">
-                                                            <label for="vehicle1"> Qris Merchant</label><br>
-                                                            <input class="radiopilih" type="radio" id="qrispendapatan" name="metode_bayar" value="pedapatan qris">
-                                                            <label for="qrispendapatan"> Pendapatan Fitness</label>
+                                                        <div class="mb-6" id="totalbayarAll" style="display: show;">
+                                                            <label class="form-label"
+                                                                for="basic-default-fullname">Tanggal Mulai</label>
+                                                            <input type="date" class="form-control" id="tanggal_mulai"
+                                                                name="tanggal_mulai" />
+                                                            <input type="hidden" class="form-control" id="idSimpan"
+                                                                name="idSimpan" value="<?=$idMember?>" readonly />
                                                         </div>
                                                     </div>
                                                 </div>

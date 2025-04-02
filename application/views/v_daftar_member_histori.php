@@ -150,7 +150,14 @@ tr:nth-child(even) {
                             <td><?= $no ?></td>
                             <!-- <td><?= $value['jenisBayar'] ?></td> -->
                             <td><?= $value['metodebayar'] ?></td>
-                            <td><?= $value['harga'] ?></td>
+                            <td>
+                              <?php $jmlBulan = ($value['durasiMember']/30); ?>
+                              <?php if ($jmlBulan > 1) { ?>
+                                <?= ($value['harga'] * $jmlBulan) - (($value['harga'] * $jmlBulan) * 0.1) ?>
+                              <?php } else { ?>
+                                <?= $value['harga'] * $jmlBulan ?>
+                              <?php } ?>
+                            </td>
                             <td><?= $value['tanggalMulai'] ?></td>
                             <td><?= $value['tanggalSelesai'] ?></td>
                           </tr>

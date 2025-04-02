@@ -217,168 +217,219 @@ data-template="vertical-menu-template-free"
 
               <!-- Basic Bootstrap Table -->
 
-              <div class="card">
+              <div class="card <?= isset($no_bukti_view) ? '':'d-none'?>">
 
                 <div id="notifications">
                   <?php echo $this->session->flashdata('msg'); ?>
                 </div>
 
-                <h5 class="card-header">Detil Jurnal</h5>
-                <div class="table-responsive text-nowrap" id="detil_jurnal">
-                  <table class="table">
-                    <thead>
-                      <tr>
-                        <th>No.</th>
-                        <th>No. Perkiraan</th>
-                        <th>Uraian</th>
-                        <th>Debet</th>
-                        <th>Kredit</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
+                <div class="card-header">
+                  <h5 class="float-start">Detil Jurnal</h5>
+                  <a class="btn btn-primary text-white float-end" data-bs-toggle="modal" data-bs-target="#modal-akun">
+                    <i class="bx bx-plus me-2"></i>
+                    Tambah Akun
+                  </a>
+                </div>
+                <?php echo form_open_multipart(site_url().'?/TransaksiJurnal/insert_data_detail_array'); ?>
+                <div class="card-body">
+                  <input class="form-control" type="hidden" name="no_bukti" placeholder=""  value="<?php if(isset($no_bukti_view)){ echo $no_bukti_view; } ?>" readonly />
+                  <table id="container_akun" class="table table-responsive">
+
+                  </table>
+                </div>
+                <div class="card-footer d-flex justify-content-end">
+                  <button type="submit" id="button_submit" disabled class="btn btn-primary" onclick="kirim_form()">
+                    <i class="bx bx-save"></i> Simpan
+                  </button>
+                </div>
+                <?php echo form_close(); ?>
+                <?php
+                if(false) {
+                  ?>
+                  <div class="table-responsive text-nowrap" id="detil_jurnal">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>No.</th>
+                          <th>No. Perkiraan</th>
+                          <th>Uraian</th>
+                          <th>Debet</th>
+                          <th>Kredit</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody class="table-border-bottom-0">
+                        <?php echo form_open_multipart(site_url().'?/TransaksiJurnal/insert_data_detail'); ?>
+                          <tr role="row">
+                              <td colspan="2">
+                                <input class="form-control" type="hidden" id="no_bukti" name="no_bukti" placeholder="" value="<?php if(isset($no_bukti_view)){ echo $no_bukti_view; } ?>" readonly="" />
+                                <select class="form-control form-control-sm" name="id_kode_akuntansi" id="id_kode_akuntansi" required=""  >
+                                <option value="">- - - - - - - - - - Daftar Akun - - - - - - - - - - </option>
+                                <?php foreach($get_all_data_akun as $row) {
+                                    $id_kode_akuntansi = $row->id_kode_akuntansi;
+                                    $kode_akun = $row->kode_akun;
+                                    $nama_akun = $row->nama_akun;
+
+                                    print "<option value='$id_kode_akuntansi'>$kode_akun - $nama_akun</option>";
+                                      } ?>
+                                </select>
+                              </td>
+                              <td>
+                                <div class="input-group input-group-sm">
+                                  <input type="text" class="form-control" name="uraian" id="uraian" placeholder="Uraian" autocomplete="off"  required="">
+                                </div>
+                              </td>
+                              <td>
+                                <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" name="debet" id="debet" placeholder="Debet" autocomplete="off">
+                                </div>
+                              </td>
+                              <td>
+                                <div class="input-group input-group-sm">
+                                  <input type="text" class="form-control" name="kredit" id="kredit" placeholder="Kredit" autocomplete="off">
+                                </div>
+                              </td>
+                              <td><button type="submit" class="btn  btn-sm  btn-primary" ><i class="bx bx-plus"></i></button></td>
+                          </tr>
+                        <?php echo form_close(); ?>
+                        <?php if(isset($no_bukti_view)) { ?>
+
+                        <?php 
+                        $no=0;
+                        $total_debet=0;
+                        $total_kredit=0;
+                        foreach($get_jurnal_detil as $row) {    
+
+                          $no++; 
+
+                          $id_jurnal_detail = $row->id_jurnal_detail;
+                          $id_kode_akuntansi= $row->id_kode_akuntansi;
+                          $uraian= $row->uraian;
+                          $debet= $row->debet;
+                          $kredit= $row->kredit;
+
+                                          #akun
+                          $rows_akun = $this->db->query("SELECT * FROM kode_akuntansi where id_kode_akuntansi='".$id_kode_akuntansi."'")->row_array();
+                          $kode_akun=$rows_akun['kode_akun'];
+                          $nama_akun_dt=$rows_akun['nama_akun'];
 
 
-                       <?php echo form_open_multipart(site_url().'?/TransaksiJurnal/insert_data_detail'); ?>
+                          $user_created = $row->user_created;
+                          $created_at = date("d F Y H:i:s", strtotime($row->created_at));
 
-                                        <tr role="row">
-                                            <td colspan="2">
-                                                <input class="form-control" type="hidden" id="no_bukti" name="no_bukti" placeholder="" value="<?php if(isset($no_bukti_view)){ echo $no_bukti_view; } ?>" readonly="" />
+                          $user_modified = $row->user_modified;
+                          $modified_at = date("d F Y H:i:s", strtotime($row->modified_at));
 
-
-                                                <select class="form-control form-control-sm" name="id_kode_akuntansi" id="id_kode_akuntansi" required=""  >
-                                                <option value="">- - - - - - - - - - Daftar Akun - - - - - - - - - - </option>
-                                                <?php foreach($get_all_data_akun as $row) {
-                                                    $id_kode_akuntansi = $row->id_kode_akuntansi;
-                                                    $kode_akun = $row->kode_akun;
-                                                    $nama_akun = $row->nama_akun;
-
-                                                    print "<option value='$id_kode_akuntansi'>$kode_akun - $nama_akun</option>";
-                                                     } ?>
-                                                </select>
-
-                                                </td>
-
-                                            <td>
-                                             <div class="input-group input-group-sm">
-                                                <input type="text" class="form-control" name="uraian" id="uraian" placeholder="Uraian" autocomplete="off"  required="">
-                                                </div>
-                                            </td>
-
-                                           
-
-                                            <td>
-                                             <div class="input-group input-group-sm">
-                                             <input type="text" class="form-control" name="debet" id="debet" placeholder="Debet" autocomplete="off">
-                                             </div>
-                                            </td>
-
-                                          
-
-                                            <td>
-                                             <div class="input-group input-group-sm">
-
-
-                                                <input type="text" class="form-control" name="kredit" id="kredit" placeholder="Kredit" autocomplete="off">
-                                                </div>
-                                            </td>
-
-
-                                           
-
-                                            <td><button type="submit" class="btn  btn-sm  btn-primary" ><i class="bx bx-plus"></i></button></td>
-                                        </tr>
-
-
-
-
-                                         <?php echo form_close(); ?>
-
-
-                    <?php if(isset($no_bukti_view)) { ?>
-
-                     <?php 
-                     $no=0;
-                     $total_debet=0;
-                     $total_kredit=0;
-                     foreach($get_jurnal_detil as $row) {    
-
-                      $no++; 
-
-                      $id_jurnal_detail = $row->id_jurnal_detail;
-                      $id_kode_akuntansi= $row->id_kode_akuntansi;
-                      $uraian= $row->uraian;
-                      $debet= $row->debet;
-                      $kredit= $row->kredit;
-
-                                      #akun
-                      $rows_akun = $this->db->query("SELECT * FROM kode_akuntansi where id_kode_akuntansi='".$id_kode_akuntansi."'")->row_array();
-                      $kode_akun=$rows_akun['kode_akun'];
-                      $nama_akun_dt=$rows_akun['nama_akun'];
-
-
-                      $user_created = $row->user_created;
-                      $created_at = date("d F Y H:i:s", strtotime($row->created_at));
-
-                      $user_modified = $row->user_modified;
-                      $modified_at = date("d F Y H:i:s", strtotime($row->modified_at));
-
-                      $total_debet = doubleval($total_debet + $debet);
-                      $total_kredit = doubleval($total_kredit + $kredit);
+                          $total_debet = doubleval($total_debet + $debet);
+                          $total_kredit = doubleval($total_kredit + $kredit);
 
 
 
-                      $selisih = doubleval($total_debet-$total_kredit);
+                          $selisih = doubleval($total_debet-$total_kredit);
 
-                      if($selisih<>0){
+                          if($selisih<>0){
 
-                       $status_balance = "Tidak Balance";
-
-                     }
-
-                     else{
-                       $status_balance = "Balance";
-                     }
-
-
-                      echo '<tr>
-                      <td class="sorting_1">'.$no.'.</td>
-                                                <td align="center">'.$kode_akun.' - '.$nama_akun_dt.'</td>
-                                                <td align="center">'.$uraian.' </td>
-                                                <td align="right">'.number_format($debet).'</td>
-                                                <td align="right">'.number_format($kredit).'</td>
-                       <td align="center">';
-                       echo '<a onclick="return konfirm_hapus_detail()" href="'.site_url().'?/TransaksiJurnal/delete_data_detail/no/'.$no_bukti_view.'/id/'.$id_jurnal_detail.'"><i class="ti-trash"></i>Hapus</a>';
-                       echo '</td><tr>';
-
+                          $status_balance = "Tidak Balance";
 
                         }
-                        ?>
 
-                      <?php } #end iset?>
-
-
-                      <?php if(isset($no_bukti_view)) { if($total_debet>0 || $total_kredit>0){ ?>
-                                         <tr role="row">
-                                            <td style="background-color: #F2F3F4" colspan="2" align="right"><b>Jurnal :</b></th>
-                                            <td style="background-color: #F2F3F4" colspan="1" align="left"><b><?= $status_balance; ?></b></th>
-                                              <td style="background-color: #F2F3F4" colspan="1" align="right"><b>Selisih :</b></th>
-                                            <td style="background-color: #F2F3F4" colspan="1" align="left"><b><?= number_format($selisih); ?></b></th>
-                                            <td style="background-color: #F2F3F4" colspan="1" align="left"></th>
-                                         </tr>
-
-                                     <?php } } ?>
+                        else{
+                          $status_balance = "Balance";
+                        }
 
 
+                          echo '<tr>
+                          <td class="sorting_1">'.$no.'.</td>
+                                                    <td align="center">'.$kode_akun.' - '.$nama_akun_dt.'</td>
+                                                    <td align="center">'.$uraian.' </td>
+                                                    <td align="right">'.number_format($debet).'</td>
+                                                    <td align="right">'.number_format($kredit).'</td>
+                          <td align="center">';
+                          echo '<a onclick="return konfirm_hapus_detail()" href="'.site_url().'?/TransaksiJurnal/delete_data_detail/no/'.$no_bukti_view.'/id/'.$id_jurnal_detail.'"><i class="ti-trash"></i>Hapus</a>';
+                          echo '</td><tr>';
 
-                      </tbody>
-                    </table>
+
+                            }
+                            ?>
+
+                          <?php } #end iset?>
+
+
+                          <?php if(isset($no_bukti_view)) { if($total_debet>0 || $total_kredit>0){ ?>
+                                            <tr role="row">
+                                                <td style="background-color: #F2F3F4" colspan="2" align="right"><b>Jurnal :</b></th>
+                                                <td style="background-color: #F2F3F4" colspan="1" align="left"><b><?= $status_balance; ?></b></th>
+                                                  <td style="background-color: #F2F3F4" colspan="1" align="right"><b>Selisih :</b></th>
+                                                <td style="background-color: #F2F3F4" colspan="1" align="left"><b><?= number_format($selisih); ?></b></th>
+                                                <td style="background-color: #F2F3F4" colspan="1" align="left"></th>
+                                            </tr>
+
+                                        <?php } } ?>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
+                  <?php
+                }
+                ?>
                 <!--/ Basic Bootstrap Table -->
 
               </div>
-
+              
+              <!-- Modal Tambah Kode Akuntansi -->
+              <div class="modal fade" id="modal-akun" tabindex="-1" aria-hidden="true" style="display: none;">
+                <div class="modal-dialog modal-lg" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel1">Pilih Kode Akuntansi</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="row">
+                        <div class="col-xl">
+                          <div class="mb-3">
+                            <table class="table table-responsive">
+                              <thead>
+                                <tr>
+                                  <th>
+                                    <input type="checkbox" class="form-check-input" id="">
+                                  </th>
+                                  <th>Kode Akun</th>
+                                  <th>Nama Akun</th>
+                                  <th>Kategori</th>
+                                </tr>
+                              </thead>
+                              <tbody class="table-border-bottom-0">
+                                <?php
+                                $no=0;
+                                foreach($get_all_data_akun as $row) {    
+                                  $no++; 
+                                  $id_kode_akuntansi = $row->id_kode_akuntansi;
+                                  echo '<tr>
+                                  <td>
+                                    <input type="checkbox" class="form-check-input" name="kode_akun" value="'.$id_kode_akuntansi.'" id="'.$id_kode_akuntansi.'">
+                                  </td>
+                                  <td>'.$row->kode_akun.'</td>
+                                  <td>'.$row->nama_akun.'</td>
+                                  <td>'.$row->pos.'</td>';
+                                }
+                                ?>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Tutup
+                      </button>
+                      <button type="button" onclick="generate_form()" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!--/ Modal Tambah Kode Akuntansi -->
 
               <!-- / Content -->
 
@@ -428,21 +479,115 @@ data-template="vertical-menu-template-free"
 
 
 <script type="text/javascript" language="JavaScript">
+  var kode_akun= <?=json_encode($get_all_data_akun)?>;
  function konfirm_hapus()
  {
- tanya = confirm("Hapus data jurnal ?");
- if (tanya == true) return true;
- else return false;
- }</script>
-
-
-     <script type="text/javascript" language="JavaScript">
+  tanya = confirm("Hapus data jurnal ?");
+  if (tanya == true) return true;
+  else return false;
+ }
+ 
  function konfirm_hapus_detail()
  {
- tanya = confirm("Hapus data detail jurnal ?");
- if (tanya == true) return true;
- else return false;
- }</script>
+  tanya = confirm("Hapus data detail jurnal ?");
+  if (tanya == true) return true;
+  else return false;
+ }
+
+ function generate_form()
+ {
+  $("#container_akun").html(`
+    <tr class="border-2 border-top-0 border-start-0 border-end-0">
+      <td>Kode Akun</td>
+      <td>Nama Akun</td>
+      <td>Uraian</td>
+      <td>Debit</td>
+      <td>Kredit</td>
+    </tr>
+  `);
+  $("input:checkbox[name=kode_akun]:checked").each(function(){
+    console.log($(this).val());
+    let akun = kode_akun.find(x => x.id_kode_akuntansi == $(this).val());
+    $("#container_akun").append(`
+      <tr style="height: 75px">
+        <td>${akun.kode_akun}</td>
+        <td>${akun.nama_akun}</td>
+        <td class="px-2"><input type="text" name="uraian[`+$(this).val()+`]" class="form-control"></td>
+        <td class="px-2"><input type="text" name="debet[`+$(this).val()+`]" onkeyup="hitung_debet()" class="form-control"></td>
+        <td class="px-2"><input type="text" name="kredit[`+$(this).val()+`]" onkeyup="hitung_kredit()" class="form-control"></td>
+      </tr>
+    `);
+  });
+  $("#container_akun").append(`
+    <tr style="height: 75px">
+      <td colspan="3">
+        <span id="status_akuntansi">Balance</span>
+      </td>
+      <td>
+        Rp. <span id="total_debet">0</span>
+      </td>
+      <td>
+        Rp. <span id="total_kredit">0</span>
+      </td>
+    </tr>
+  `);
+  $('#modal-akun').modal('hide');
+ }
+
+ function hitung_debet(){
+  let total_debet = 0;
+  $(document).find("input[name^='debet']").each(function(){
+    let val = $(this).val();
+    if(val == "") val = 0;
+    total_debet += parseInt(val);
+  });
+  $(document).find("#total_debet").html(total_debet);
+  hitung_selisih();
+ }
+
+  function hitung_kredit(){
+    let total_kredit = 0;
+    $(document).find("input[name^='kredit']").each(function(){
+      let val = $(this).val();
+      if(val == "") val = 0;
+      total_kredit += parseInt(val);
+    });
+    $(document).find("#total_kredit").html(total_kredit);
+    hitung_selisih();
+  }
+
+  function hitung_selisih(){
+    let total_debet = parseInt($(document).find("#total_debet").html());
+    let total_kredit = parseInt($(document).find("#total_kredit").html());
+    let selisih = total_debet - total_kredit;
+    if(selisih == 0){
+      $(document).find("#status_akuntansi").html("Balance");
+      $(document).find("#button_submit").prop("disabled", false);
+    }else{
+      $(document).find("#status_akuntansi").html("Selisih");
+      $(document).find("#button_submit").prop("disabled", true);
+    }
+  }
+
+  function kirim_form() {
+    let form = document.getElementById("form_akun");
+    let formData = new FormData(form);
+    $.ajax({
+      url: form.action,
+      type: form.method,
+      data: formData,
+      success: function(response){
+        console.log(response);
+      },
+      error: function(xhr, status, error){
+        console.log(xhr.responseText);
+      },
+      cache: false,
+      contentType: false,
+      processData: false
+    });
+  }
+ </script>
 
   
      

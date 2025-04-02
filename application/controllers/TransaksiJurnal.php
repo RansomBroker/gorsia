@@ -219,6 +219,37 @@ class TransaksiJurnal extends CI_Controller{
 
     }
 
+    public function insert_data_detail_array(){
+        # mengambil input dari form
+        $no_bukti               = $this->input->post('no_bukti');
+        $id_kode_akuntansi      = $this->input->post('id_kode_akuntansi');
+        $uraian                 = $this->input->post('uraian');
+        $debet                  = $this->input->post('debet');
+        $kredit                 = $this->input->post('kredit');
+
+        $user_created = $this->session->username;
+        $created_at = date("Y-m-d H:i:s");
+
+
+        #data dari form dijadikan array 
+        foreach($this->input->post('uraian') as $key => $value) {
+          $simpan_data_detail=array(
+              'no_bukti'              => $no_bukti,
+              'uraian'                => $value,
+              'id_kode_akuntansi'     => $key,
+              'debet'                 => $debet[$key],
+              'kredit'                => $kredit[$key],
+              'user_created'          => $user_created,
+              'created_at'            => $created_at
+          );
+
+          #pengiriman data ke model untuk insert data
+          $this->M_transaksi_jurnal->insert_data_detail($simpan_data_detail, $no_bukti);
+        }
+
+        redirect(site_url()."?/JurnalUmum");
+    }
+
 
     public function delete_data_detail()
     {

@@ -4,47 +4,52 @@ include_once 'v_user_config.php';
 
 <!DOCTYPE html>
 
-<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="assets/backend/" data-template="vertical-menu-template-free">
+<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="<?=base_url()?>/assets/backend/" data-template="vertical-menu-template-free">
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+  />
 
-  <title>Gorsia - Member</title>
+  <title>Gorsia - Rekap Pembayaran</title>
 
   <meta name="description" content="" />
 
   <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="assets/backend/img/favicon/favicon.ico" />
+  <link rel="icon" type="image/x-icon" href="<?=base_url()?>/assets/backend/img/favicon/favicon.ico" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+  <link
+  href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+  rel="stylesheet"
+  />
 
   <!-- Icons. Uncomment required icon fonts -->
-  <link rel="stylesheet" href="assets/backend//vendor/fonts/boxicons.css" />
+  <link rel="stylesheet" href="<?=base_url()?>/assets/backend//vendor/fonts/boxicons.css" />
 
   <!-- Core CSS -->
-  <link rel="stylesheet" href="assets/backend/vendor/css/core.css" class="template-customizer-core-css" />
-  <link rel="stylesheet" href="assets/backend/vendor/css/theme-default.css" class="template-customizer-theme-css" />
-  <link rel="stylesheet" href="assets/backend/css/demo.css" />
+  <link rel="stylesheet" href="<?=base_url()?>/assets/backend/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="<?=base_url()?>/assets/backend/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="<?=base_url()?>/assets/backend/css/demo.css" />
 
   <!-- Vendors CSS -->
-  <link rel="stylesheet" href="assets/backend/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <link rel="stylesheet" href="<?=base_url()?>/assets/backend/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 
-  <link rel="stylesheet" href="assets/backend/vendor/libs/apex-charts/apex-charts.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css" />
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap4.css" />
+  <link rel="stylesheet" href="<?=base_url()?>/assets/backend/vendor/libs/apex-charts/apex-charts.css" />
 
   <!-- Page CSS -->
+
   <!-- Helpers -->
-  <script src="assets/backend/vendor/js/helpers.js"></script>
+  <script src="<?=base_url()?>/assets/backend/vendor/js/helpers.js"></script>
 
   <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-  <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-  <script src="assets/backend/js/config.js"></script>
-</head>
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+    <script src="<?=base_url()?>/assets/backend/js/config.js"></script>
+  </head>
 
 <body>
   <!-- Layout wrapper -->
@@ -61,44 +66,46 @@ include_once 'v_user_config.php';
               <h5 class="card-header">Data Pendapatan Fitnes</h5>
               <div id="notifications">
                 <?php echo $this->session->flashdata('msg'); ?>
-              </div>
+              </div>              
               <div class="table-responsive text-nowrap p-3">
-              <form method="GET" action="<?= site_url('PendapatanFitnes') ?>" class="row g-3 align-items-center mb-2">
-                <div class="col-auto">
-                    <label for="bulan" class="col-form-label">Bulan:</label>
-                </div>
-                <div class="col-auto">
-                    <select name="bulan" id="bulan" class="form-select">
-                        <option value="all" <?= ($selected_bulan == 'all') ? 'selected' : ''; ?>>All</option>
+                <form action="<?=site_url()?>/PendapatanFitnes/filter" method="GET">
+                  <div class="row mb-3">
+                      <div class="col-md-4">
+                        <label for="periode" class="form-label">Periode (Bulan)</label>
+                        <select class="form-control" id="periode" name="periode" required>
+                          <option value="">Pilih Bulan</option>
+                          <?php 
+                          $months = [
+                            '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
+                            '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
+                            '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+                          ];
+                          foreach ($months as $num => $name) {
+                            $selected = (!empty($periode) && $periode == $num) ? 'selected' : '';
+                            echo "<option value='$num' $selected>$name</option>";
+                          }
+                          ?>
+                        </select>
+                      </div>
+                      <div class="col-md-4">
+                        <label for="tahun" class="form-label">Tahun</label>
+                        <select class="form-control" id="tahun" name="tahun" required>
+                        <option value="">Pilih Tahun</option>
                         <?php 
-                        for ($i = 1; $i <= 12; $i++) {
-                            $namaBulan = date("F", mktime(0, 0, 0, $i, 10));
-                            $selected = ($i == $selected_bulan) ? 'selected' : '';
-                            echo "<option value='{$i}' {$selected}>{$namaBulan}</option>";
+                        $currentYear = date('Y');
+                        for ($i = $currentYear; $i >= $currentYear - 2; $i--) {
+                          $selected = (!empty($tahun) && $tahun == $i) ? 'selected' : '';
+                          echo "<option value='$i' $selected>$i</option>";
                         }
                         ?>
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <label for="tahun" class="col-form-label">Tahun:</label>
-                </div>
-                <div class="col-auto">
-                    <select name="tahun" id="tahun" class="form-select">
-                        <option value="all" <?= ($selected_tahun == 'all') ? 'selected' : ''; ?>>All</option>
-                        <?php 
-                        $tahunSekarang = date('Y');
-                        for ($tahun = $tahunSekarang - 5; $tahun <= $tahunSekarang; $tahun++) {
-                            $selected = ($tahun == $selected_tahun) ? 'selected' : '';
-                            echo "<option value='{$tahun}' {$selected}>{$tahun}</option>";
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary">Filter</button>
-                </div>
-            </form>
-
+                        </select>
+                      </div>
+                    <div class="col-md-4 d-flex gap-3 align-items-end justify-content-end">
+                      <button type="submit" class="btn btn-primary" id="filter_btn">Filter</button>
+                      <a href="<?=site_url()?>/PendapatanFitnes" class="btn btn-secondary" id="reset_btn">Reset</a>
+                    </div>
+                  </div>
+                </form>
                 <table class="table table-hover mt-3 mb-3" id="tabelmember">
                   <thead>
                     <tr>
@@ -117,7 +124,7 @@ include_once 'v_user_config.php';
                         <td><?= $value['created_at'] ?></td>
                         <td><?= $value['nama'] ?></td>
                         <td><?= $value['metodebayar'] ?></td>
-                        <td><?= $value['harga'] ?></td>
+                        <td><?= $value['harga'] * ($value['durasiMember']/30) ?></td>
                       </tr>
                     <?php $no++;
                     } ?>
@@ -138,35 +145,36 @@ include_once 'v_user_config.php';
   </div>
   <!-- Core JS -->
   <!-- build:js assets/vendor/js/core.js -->
-  <script src="assets/backend/vendor/libs/jquery/jquery.js"></script>
-  <script src="assets/backend/vendor/libs/popper/popper.js"></script>
-  <script src="assets/backend/vendor/js/bootstrap.js"></script>
-  <script src="assets/backend/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="<?=base_url()?>/assets/backend/vendor/libs/jquery/jquery.js"></script>
+  <script src="<?=base_url()?>/assets/backend/vendor/libs/popper/popper.js"></script>
+  <script src="<?=base_url()?>/assets/backend/vendor/js/bootstrap.js"></script>
+  <script src="<?=base_url()?>/assets/backend/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
 
-  <script src="assets/backend/vendor/js/menu.js"></script>
+  <script src="<?=base_url()?>/assets/backend/vendor/js/menu.js"></script>
   <!-- endbuild -->
 
   <!-- Vendors JS -->
-  <script src="assets/backend/vendor/libs/apex-charts/apexcharts.js"></script>
+  <script src="<?=base_url()?>/assets/backend/vendor/libs/apex-charts/apexcharts.js"></script>
 
   <!-- Main JS -->
-  <script src="assets/backend/js/main.js"></script>
-  <!-- <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script> -->
+  <script src="<?=base_url()?>/assets/backend/js/main.js"></script>
 
   <!-- Page JS -->
-  <script src="assets/backend/js/dashboards-analytics.js"></script>
-  <!-- data table -->
-  <!-- <script src=" https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script> -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script> -->
+  <script src="<?=base_url()?>/assets/backend/js/dashboards-analytics.js"></script>
+
   <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
   <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap4.js"></script>
-
-
-
 
   <!-- Place this tag in your head or just before your close body tag. -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
 
+     <script type="text/javascript">
+      function konfirm_hapus()
+      {
+        tanya = confirm("Hapus data ?");
+       if (tanya == true) return true;
+       else return false;
+     }</script>
 
 
   <script type="text/javascript">

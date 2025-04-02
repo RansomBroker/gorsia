@@ -23,27 +23,15 @@ class M_rekap_penyewaan extends CI_Model
 
 
   #function untuk data tabel
-  public function get_all_rekap_penyewaan($bulan = null, $tahun = null)
+  public function get_all_rekap_penyewaan()
   {
-      $table = "transaksi_sewa"; // nama tabel
-      
-      // Jika parameter bulan bukan "all", tambahkan filter berdasarkan bulan
-      if($bulan != 'all'){
-          $this->db->where('MONTH(tanggal)', $bulan);
-      }
-
-      // Jika parameter tahun bukan "all", tambahkan filter berdasarkan tahun
-      if($tahun != 'all'){
-          $this->db->where('YEAR(tanggal)', $tahun);
-      }
-
-      $this->db->order_by("tanggal", "desc"); // sortir data
-      $query = $this->db->get($table);
-      return $query->result();
+    $table= "transaksi_sewa"; #nama_table
+    $this->db->order_by("tanggal", "desc"); #sortir_data
+    $query = $this->db->get($table);
+    return $query->result();
   }
 
-  
-
+ 
 
   function delete_data($id_transaksi)
   {

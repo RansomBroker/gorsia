@@ -6,15 +6,19 @@ $id_trx = $this->uri->segment('4');
 
  #lapangan yg disewa
 $rows_lapangan_disewa = $this->db->query("SELECT * FROM transaksi_sewa where id_transaksi='".$id_trx."'")->row_array();
+$tanggal_sewa = $this->db->query("SELECT tanggal FROM transaksi_sewa_tanggal WHERE id_transaksi='".$id_trx."'")->result_array();
 $tanggal_view=$rows_lapangan_disewa['tanggal'];
 $nama_pelanggan_view=$rows_lapangan_disewa['nama_pelanggan'];
 $id_member_view=$rows_lapangan_disewa['id_member'];
+$diskon=$rows_lapangan_disewa['diskon'];
 $no_telepon_view=$rows_lapangan_disewa['no_telepon'];
 $id_kategori_olahraga=$rows_lapangan_disewa['id_kategori_olahraga'];
 $id_lapangan=$rows_lapangan_disewa['id_lapangan'];
 $status_transaksi_view=$rows_lapangan_disewa['status_transaksi'];
+$diskon_harga_view=$rows_lapangan_disewa['diskon'];
 $total_harga_view=$rows_lapangan_disewa['total'];
-
+$jenis_bayar_view=$rows_lapangan_disewa['jenis_bayar'];
+$metode_bayar=$rows_lapangan_disewa['metode_bayar'];
 
 #lapangan
 $rows_lapangan = $this->db->query("SELECT * FROM lapangan where id_lapangan='".$id_lapangan."'")->row_array();
@@ -101,6 +105,8 @@ data-template="vertical-menu-template-free"
   <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="assets/backend/js/config.js"></script>
+
+    <link href="assets/select2/select2.min.css" rel="stylesheet" />
   </head>
 
   <body>
@@ -158,6 +164,9 @@ data-template="vertical-menu-template-free"
                 </div>
 
                 <div class="col-xl">
+                  <div id="notifications">
+                    <?php echo $this->session->flashdata('msg'); ?>
+                  </div>
                   <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                       <h5 class="mb-0">Silahkan isi data penyewa</h5>
@@ -168,47 +177,101 @@ data-template="vertical-menu-template-free"
                 echo form_open_multipart(site_url().'?/Penyewaan/update_data_penyewaan/idtrx/'.$id_trx); 
                 ?>
                       <form>
-
-                        <div class="mb-3">
-                          <label class="form-label" for="basic-default-company">Tanggal</label>
-                          <input type="date" class="form-control" id="tanggal" name="tanggal" placeholder="" required value="<?php if(isset($tanggal_view)){ echo $tanggal_view; } ?>"  <?php if($tanggal_view<>'0000-00-00'){ echo "readonly"; } ?> />
-                        </div>
+                        <?php
+                          $readonly = "";
+                          if($hak_akses=='Administrator') {
+                            $readonly = "readonly";
+                          }
+                        ?>
+                        <?php if(!empty($tanggal_sewa)){ ?>
+                          <div class="mb-3" id="container-tanggal">
+                            <label class="form-label" for="basic-default-company">Tanggal</label>
+                            <?php foreach($tanggal_sewa as $key => $value) { ?>
+                              <div class="mt-2">
+                                <input type="date" class="form-control" value="<?=$value['tanggal']?>" id="tanggal" name="tanggal[]" readonly/>
+                              </div>
+                            <?php } ?>
+                          </div>
+                        <?php } else { ?>
+                          <div class="mb-3" id="container-tanggal">
+                            <label class="form-label" for="basic-default-company">Tanggal</label>
+                            <div class="d-flex">
+                              <input type="date" class="form-control" id="tanggal" name="tanggal[]" placeholder="" required value="<?php if(isset($tanggal_view)){ echo $tanggal_view; } ?>"  <?php if($tanggal_view<>'0000-00-00'){ echo "readonly"; } ?> />
+                              <button class="ms-2 btn btn-success" type="button" onclick="tambah_tanggal()">+</button>
+                            </div>
+                          </div>
+                        <?php } ?>
 
 
                         <div class="mb-3">
                           <label class="form-label" for="basic-default-fullname">Member</label>
-                          <select class="form-select" id="id_member" name="id_member" aria-label="Default select example" required>
-                            <?php if(isset($tanggal_view)){
-                              print "<option value='$id_member_view' selected>$id_member_view</option>";
-                            }?>
+                          <select class="form-select select2" id="id_member" name="id_member" aria-label="Default select example" required>
+                            <option value="" selected>- - - Pilih - - -</option>
                             <option value='NONMEMBER'>Non Member</option>
-                            <option>- - - Pilih - - -</option>
                             <?php foreach($get_all_member as $row) {  
-                              $id_member_cb = $row->id_member;
-                              $nama_pelanggan_cb = $row->nama_pelanggan;
-                              print "<option value='$id_member_cb'>$id_member_cb - $nama_pelanggan_cb</option>";
+                              $selected = (isset($id_member_view)) ? ($id_member_view == $row->id_member) ? 'selected' : '' : '';
+                              print "<option value='$row->id_member' $selected>$row->nama_pelanggan - $row->no_telepon</option>";
                             } ?>
                           </select>
                         </div>
 
                          <div class="mb-3">
                           <label class="form-label" for="basic-default-company">Nama Pelanggan</label>
-                          <input type="text" class="form-control" id="nama_pelanggan" name="nama_pelanggan" placeholder="" required value="<?php if(isset($tanggal_view)){ echo $nama_pelanggan_view; } ?>" />
+                          <input type="text" class="form-control" id="nama_pelanggan" name="nama_pelanggan" placeholder="" required value="<?php if(isset($tanggal_view)){ echo $nama_pelanggan_view; } ?>" <?php echo $readonly; ?> />
                         </div>
 
                          <div class="mb-3">
                           <label class="form-label" for="basic-default-company">No. Telepon</label>
-                          <input type="text" class="form-control" id="no_telepon" name="no_telepon" placeholder="" required value="<?php if(isset($tanggal_view)){ echo $no_telepon_view; } ?>" />
+                          <input type="text" class="form-control" id="no_telepon" name="no_telepon" placeholder="" required value="<?php if(isset($tanggal_view)){ echo $no_telepon_view; } ?>" <?php echo $readonly; ?> />
+                        </div>
+                        
+                        <div class="mb-3">
+                          <label class="form-label" for="basic-default-company">Diskon (dalam Rupiah)</label>
+                          <input type="number" class="form-control" id="diskon" name="diskon" onchange="newDiskon()" placeholder="Potongan Harga" required value="<?php if(isset($tanggal_view)){ echo $diskon; } ?>" />
                         </div>
                        
-                         <?php if($tanggal_view=='0000-00-00'){ ?>
-                        <button type="submit" class="btn btn-primary">Lanjut Pilih Sesi</button>
-                      <?php } else { ?>
-                        <button type="submit" class="btn btn-primary">Simpan data</button>
-                      <?php } ?>
+                        <?php if($tanggal_view=='0000-00-00'){ ?>
+                          <button type="submit" class="btn btn-primary">Lanjut Pilih Sesi</button>
+                        <?php } else { ?>
+                          <button type="submit" class="btn btn-primary">Simpan data</button>                          
+                        <?php } ?>
 
                         
                    
+                      </form>
+                      
+                      <?php echo form_close(); ?>
+                    </div>
+                    <div class="card-footer">
+                      <?php
+                      echo form_open_multipart(site_url().'?/Penyewaan/validasi_data_penyewaan'); 
+                      ?>
+                      <form>
+                        <?php if($hak_akses=='Administrator' && $status_transaksi_view=='Pengajuan Diskon'){ ?>
+                          <input type="hidden" id="id_transaksi" name="id_transaksi" class="form-control" placeholder="" value="<?php if(isset($id_trx)){ echo $id_trx; } ?>" required="">
+                          <input type="hidden" class="form-control" id="new_diskon" name="diskon" placeholder="Potongan Harga" required value="<?php if(isset($tanggal_view)){ echo $diskon; } ?>" />
+                          <div class="mb-3" align="center"><button type="submit" class="btn btn-primary">Validasi</button></div>
+                        <?php } ?>
+                      </form>
+                      <?php echo form_close(); ?>
+
+                      <?php
+                      echo form_open_multipart(site_url().'?/Penyewaan/terima_data_penyewaan'); 
+                      ?>
+                      <form>
+                        <?php if($hak_akses=='Staff' && $status_transaksi_view=='Validasi'){ ?>
+                          <input type="hidden" id="id_transaksi" name="id_transaksi" class="form-control" value="<?php if(isset($id_trx)){ echo $id_trx; } ?>" required="">
+                          <div class="mb-3" align="center"><button type="submit" class="btn btn-success">Terima Pembayaran</button></div>
+                        <?php } ?>
+                      </form>
+                      <?php echo form_close(); ?>
+
+                      <?php echo form_open_multipart(site_url().'?/Penyewaan/ubah_status_cancel/id_trx/'.$id_trx); ?>
+                      <form>
+                        <?php if($hak_akses=='Administrator' && $status_transaksi_view=='Pengajuan Diskon'){ ?>
+                          <input type="hidden" name="nama_pelanggan" value="<?php if(isset($tanggal_view)){ echo $nama_pelanggan_view; } ?>">
+                          <div class="mb-3" align="center"><button type="submit" class="btn btn-danger"><span class="fa fa-check"></span> Cancel </button></div>
+                          <?php } ?>
                       </form>
                       <?php echo form_close(); ?>
                     </div>
@@ -220,7 +283,7 @@ data-template="vertical-menu-template-free"
 
               <!-- Jadwal Sesi -->
               <?php if($tanggal_view<>'0000-00-00'){ ?>
-              <?php echo form_open_multipart(site_url().'?/Penyewaan/select_sesi_sewa/id_trx/'.$id_trx); ?>
+                <?php echo form_open_multipart(site_url().'?/Penyewaan/select_sesi_sewa/id_trx/'.$id_trx, array('id' => 'select_sesi_sewa_form')); ?>
 
               <div class="card">
 
@@ -229,7 +292,7 @@ data-template="vertical-menu-template-free"
                 <div class="d-flex flex-wrap" id="icons-container">
 
                   <?php $no=0;
-                  foreach($get_all_jadwal_sesi as $row) {    
+                  foreach($get_all_jadwal_sesi as $key => $row) {    
                     $no++; 
 
                     $id_jadwal_sesi = $row->id_jadwal_sesi;
@@ -242,7 +305,11 @@ data-template="vertical-menu-template-free"
 
                     #baca apa sesi ini ada pada transaksi
 
-                    $rows_cek = $this->db->query("SELECT * FROM transaksi_sewa_detil JOIN transaksi_sewa ON transaksi_sewa_detil.id_transaksi=transaksi_sewa.id_transaksi where transaksi_sewa_detil.id_jadwal_sesi='".$id_jadwal_sesi."' AND transaksi_sewa.tanggal='".$tanggal_view."'")->row_array();
+                    $rows_cek = $this->db->query("SELECT * FROM transaksi_sewa_detil 
+                      JOIN transaksi_sewa ON transaksi_sewa_detil.id_transaksi=transaksi_sewa.id_transaksi 
+                      where transaksi_sewa_detil.id_jadwal_sesi='".$id_jadwal_sesi."' 
+                      AND transaksi_sewa.status_transaksi != 'Cancel'
+                      AND transaksi_sewa.tanggal='".$tanggal_view."'")->row_array();
                     $id_transaksi_detil_cek=$rows_cek['id_transaksi_detil'];
 
                     if(isset($id_transaksi_detil_cek)){
@@ -264,9 +331,10 @@ data-template="vertical-menu-template-free"
                       <div class="card-body">
                         <div class="form-check">
                           <input class="form-check-input" type="checkbox" value="1" name="txt_check_id_jadwal_sesi_<?=$id_jadwal_sesi;?>" id="txt_check_id_jadwal_sesi_<?=$id_jadwal_sesi;?>" <?php if(isset($id_transaksi_detil_cek)){ echo "disabled"; } ?> >
+                          <input type="hidden" name="jam_sesi_<?=$key;?>" id="jam_sesi_<?=$key;?>" value="<?=$id_jadwal_sesi;?>">
                         </div>
-                        <p class="icon-name text-capitalize text-truncate mb-0"><b><?= $jam_sesi; ?></b><br> <?= $harga_new; ?></p>
-                          <input type="hidden" class="form-control" id="txt_harga" name="txt_harga" placeholder="" required value="<?= $harga ?>" />
+                        <p class="icon-name text-capitalize text-truncate mb-0"><b class="txt_check_id_jadwal_sesi_<?=$id_jadwal_sesi;?>"><?= $jam_sesi; ?></b><br> <?= $harga_new; ?></p>
+                          <input type="hidden" class="form-control" id="txt_harga_<?=$id_jadwal_sesi;?>" name="txt_harga" placeholder="" required value="<?= $harga ?>" />
 
                       </div>
 
@@ -278,7 +346,43 @@ data-template="vertical-menu-template-free"
 
 
                 </div>
-                  <div class="mb-3" align="center"><button type="submit" class="btn btn-primary"><span class="fa fa-check"></span> Pilih </button></div>
+                <div class="row mb-3">
+                  <div class="col-sm-3">
+
+                  </div>
+                  <div class="col-sm-3" align="center">
+                    <label class="form-label" for="pembayaran">Jenis Transaksi</label><br>
+                    <div class="d-flex justify-content-center gap-3">
+                      <div>
+                        <input type="radio" id="dp" name="pembayaran" value="dp" required>
+                        <label for="dp">DP</label>
+                      </div>
+                      <div>
+                        <input type="radio" id="lunas" name="pembayaran" value="lunas" required>
+                        <label for="lunas">Lunas</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-3" align="center">
+                    <label class="form-label" for="metode_bayar">Metode Pembayaran</label><br>
+                    <div class="d-flex justify-content-center gap-3">
+                      <div>
+                        <input type="radio" id="qris" name="metode_bayar" value="qris" required>
+                        <label for="qris">Qris Merchant</label>
+                      </div>
+                      <div>
+                        <input type="radio" id="cash" name="metode_bayar" value="cash" required>
+                        <label for="cash">Cash</label>
+                      </div>
+                    </div>
+                  </div>
+                  <input type="hidden" name="diskon" id="diskon" value="<?= $diskon_harga_view; ?>">
+                  <div class="col-sm-3">
+
+                  </div>
+                </div>
+
+                <div class="mb-3" align="center"><button type="button" onclick="konfirmasi()" class="btn btn-primary"><span class="fa fa-check"></span> Pilih </button></div>
 
               </div>
 
@@ -291,11 +395,7 @@ data-template="vertical-menu-template-free"
 
                <!-- Total Transaksi -->
 
-              <div class="card">
-
-                <div id="notifications">
-                  <?php echo $this->session->flashdata('msg'); ?>
-                </div>
+              <div class="card mt-3">              
 
                 <h5 class="card-header">Total Transaksi</h5>
                 <div class="table-responsive text-nowrap">
@@ -333,13 +433,36 @@ data-template="vertical-menu-template-free"
                           echo '</td><tr>';
 
                         }
+                        
                         ?>
-
 
 
                       </tbody>
 
                       <tfoot>
+                        <?php
+                        if (!empty($get_all_sewa_detil)){
+                          echo '<tr>
+                          <th>HARGA</th>
+                          <th>Rp. '.number_format($total_harga_view).'</th>
+                          <th></th>
+                          </tr>';
+                          echo '<tr>
+                          <th>DISKON</th>
+                          <th>Rp. '.number_format($diskon).'</th>
+                          <th></th>
+                          </tr>';
+                          $dp = 0;
+                          if ($jenis_bayar_view == 'dp') {
+                            $dp = $total_harga_view/2;
+                            echo '<tr>
+                            <th>DP</th>
+                            <th>Rp. '.number_format($dp).'</th>
+                            <th></th>
+                            </tr>';
+                          }
+                          $total_harga_view = $total_harga_view - $diskon - $dp;
+                        }?>
                       <tr>
                         <th>TOTAL HARGA</th>
                         <th>Rp. <?= number_format($total_harga_view); ?></th>
@@ -355,21 +478,33 @@ data-template="vertical-menu-template-free"
                 <!-- Status Transaksi -->
               <?php if($status_transaksi_view<>'Draft'){ ?>
 
-              <div class="card">
+              <div class="card mt-3">
 
                 <h5 class="card-header">Status Transaksi : <?= $status_transaksi_view; ?></h5>
 
-              <?php echo form_open_multipart(site_url().'?/Penyewaan/ubah_status_in_sewa/id_trx/'.$id_trx); ?>
+                <?php if($status_transaksi_view!='Cancel' && $status_transaksi_view!='Selesai'){ ?>
+              <?php echo form_open_multipart(site_url().'?/Penyewaan/ubah_status_cancel/id_trx/'.$id_trx); ?>
 
-                  <div class="mb-3" align="center"><button type="submit" class="btn btn-primary"><span class="fa fa-check"></span> Check In Sewa </button></div>
-
-              <?php echo form_close(); ?>
-
-               <?php echo form_open_multipart(site_url().'?/Penyewaan/ubah_status_selesai/id_trx/'.$id_trx); ?>
-
-                  <div class="mb-3" align="center"><button type="submit" class="btn btn-primary"><span class="fa fa-check"></span> Transaksi Selesai </button></div>
+                  <input type="hidden" name="nama_pelanggan" value="<?php if(isset($tanggal_view)){ echo $nama_pelanggan_view; } ?>">
+                  <div class="mb-3" align="center"><button type="submit" class="btn btn-primary"><span class="fa fa-check"></span> Cancel </button></div>
 
               <?php echo form_close(); ?>
+
+              <?php echo form_open_multipart(site_url().'?/Penyewaan/ubah_status_selesai/id_trx/'.$id_trx); ?>
+
+                   <input type="hidden" name="nama_pelanggan" value="<?php if(isset($tanggal_view)){ echo $nama_pelanggan_view; } ?>">
+                  <div class="mb-3" align="center">
+                    <?php if ($jenis_bayar_view == 'dp' && $status_transaksi_view=='Booking') { ?>
+                      <a data-bs-toggle="modal" class="btn btn-primary text-white" data-bs-target="#modal-tambah-data">Transaksi Selesai</a>
+                    <?php } else{ ?>
+                      <?php if ($status_transaksi_view<>'Pengajuan Diskon' && $status_transaksi_view<>'Validasi') { ?>
+                        <button type="submit" class="btn btn-primary"><span class="fa fa-check"></span> Transaksi Selesai </button>
+                      <?php } ?>
+                    <?php } ?>
+                    
+                  </div>
+
+              <?php echo form_close(); }?>
 
 
                <?php echo form_open_multipart(site_url().'?/Penyewaan/cetak/id_trx/'.$id_trx); ?>
@@ -382,9 +517,6 @@ data-template="vertical-menu-template-free"
               </div>
 
               <?php } ?>
-
-              <!--/ Jadwal Sesi -->
-
 
             </div>
 
@@ -411,7 +543,53 @@ data-template="vertical-menu-template-free"
      </div>
      <!-- / Layout wrapper -->
 
-
+     <!-- Modal Pelunasan DP -->
+     <div class="modal fade" id="modal-tambah-data" tabindex="-1" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel1">Pelunasan DP</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <?php echo form_open_multipart(site_url().'?/Penyewaan/ubah_status_selesai/id_trx/'.$id_trx); ?>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-xl">
+                  <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                      <h5 class="mb-0">Metode Pembayaran</h5>
+                      <small class="text-muted float-end"></small>
+                    </div>
+                    <div class="card-body">
+                      <input type="hidden" name="dp_nama_pelanggan" value="<?php if(isset($tanggal_view)){ echo $nama_pelanggan_view; } ?>">
+                      <div class="mb-3">
+                        <div class="d-flex justify-content-center gap-3">
+                          <div>
+                            <input type="radio" id="dp_qris" name="dp_metode_bayar" value="qris" required>
+                            <label for="qris">Qris Merchant</label>
+                          </div>
+                          <div>
+                            <input type="radio" id="dp_cash" name="dp_metode_bayar" value="cash" required>
+                            <label for="cash">Cash</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                Tutup
+              </button>
+              <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+            </div>
+            <?php echo form_close(); ?>
+          </div>
+        </div>
+      </div>
+      <!--/ Modal Pelunasan DP -->
 
      <!-- Core JS -->
      <!-- build:js assets/vendor/js/core.js -->
@@ -431,9 +609,11 @@ data-template="vertical-menu-template-free"
 
      <!-- Page JS -->
      <script src="assets/backend/js/dashboards-analytics.js"></script>
+     <script src="assets/swal/sweetalert2@11.js"></script>
 
      <!-- Place this tag in your head or just before your close body tag. -->
      <script async defer src="https://buttons.github.io/buttons.js"></script>
+     <script src="assets/select2/select2.min.js"></script>
 
      <script type="text/javascript">
       function konfirm_hapus()
@@ -441,27 +621,165 @@ data-template="vertical-menu-template-free"
         tanya = confirm("Hapus data ?");
        if (tanya == true) return true;
        else return false;
-     }</script>
+     }
+     
+      function konfirmasi(){
+        if(document.querySelectorAll('input[name="pembayaran"]:checked').length == 0){
+          Swal.fire("Error!", "Silahkan Pilih Jenis Transaksi.", "error");
+          return;
+        }
+        if(document.querySelectorAll('input[name="metode_bayar"]:checked').length == 0){
+          Swal.fire("Error!", "Silahkan Pilih Metode Bayar.", "error");
+          return;
+        }
+        Swal.fire({
+         title: "Apakah Pesanan Sesuai ?",
+         html: `<div>
+            <p>Pastikan data yang anda masukkan sudah benar</p>
+            <p>Nama : `+document.getElementById("nama_pelanggan").value+`</p>
+            <p>No. Telepon : `+document.getElementById("no_telepon").value+`</p>
+            <p>Tanggal : `+getTanggal()+`</p>
+            <p>Sesi : `+getSesi()+`</p>
+            <p>Diskon : `+getDiskon()+`</p>
+            <p>Total Bayar : `+getTotal()+`</p>
+            <p>Total DP : `+getTotalDP()+`</p>
+            <p>Metode Bayar : `+getMetodeBayar()+`</p>
+            <p>Jenis Transaksi : `+getJenisBayar()+`</p>
+            <p>Lapangan : <?= $kategori_olahraga; ?> - <?= $nama_lapangan; ?></p>
+            </div>`,
+         showCancelButton: true,
+         confirmButtonText: "Simpan",
+         cancelButtonText: "Batal",
+       }).then((result) => {
+         /* Read more about isConfirmed, isDenied below */
+         if (result.isConfirmed) {
+             $.ajax({
+             url: $('#select_sesi_sewa_form').attr('action'),
+             type: 'POST',
+             data: $('#select_sesi_sewa_form').serialize(),
+             success: function(response) {
+               Swal.fire("Saved!", "", "success");
+                setTimeout(function() {
+                  location.reload();
+                }, 1000);
+             },
+             error: function() {
+               Swal.fire("Error!", "There was an error saving the data.", "error");
+             }
+             });
+         }
+       });
+      }
+
+      function getTanggal() {
+        var tanggal = "";
+        var dates = document.querySelectorAll('input[type="date"]');
+        for (var i = 0; i < dates.length; i++) {
+          tanggal += dates[i].value + ", ";
+        }
+        return tanggal.trim().slice(0, -1);
+      }
+
+      function getSesi() {
+        var sesi = "";
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        for (var i = 0; i < checkboxes.length; i++) {
+          if (checkboxes[i].checked) {
+            sesi += $("."+checkboxes[i].id).html() + ", ";
+          }
+        }
+        return sesi.trim().slice(0, -1);
+      }
+
+      function getTotal() {
+        var sesi = 0;
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        for (var i = 0; i < checkboxes.length; i++) {
+          if (checkboxes[i].checked) {
+            let index = $("#jam_sesi_"+i).val();
+            console.log(index,"#jam_sesi_"+i);
+            sesi += parseInt($("#txt_harga_"+index).val());
+          }
+        }
+        var dates = document.querySelectorAll('input[type="date"]');
+        sesi = (parseInt(sesi) * dates.length) - parseInt($('#diskon').val());
+        return "Rp. " + sesi.toLocaleString('id-ID');
+      }
+
+      function getTotalDP() {
+        var sesi = 0;
+        let jenis = document.querySelector('input[name="pembayaran"]:checked').value;
+        if (jenis == "dp") {
+          var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+          for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+              let index = $("#jam_sesi_"+i).val();
+              console.log(index,"#jam_sesi_"+i);
+              sesi += parseInt($("#txt_harga_"+index).val());
+            }
+          }
+          var dates = document.querySelectorAll('input[type="date"]');
+          sesi = ((parseInt(sesi) * dates.length) - parseInt($('#diskon').val()))/2; // 50%
+          return "Rp. " + sesi.toLocaleString('id-ID');
+        } else{
+          return "Rp. 0";
+        }
+      }
+
+      function getDiskon() {
+        return "Rp. " + parseInt($('#diskon').val()).toLocaleString('id-ID');
+      }
+
+      function getMetodeBayar() {
+        let metode = document.querySelector('input[name="metode_bayar"]:checked').value;
+        return metode == "qris" ? "Qris Merchant" : "Cash";
+      }
+
+      function getJenisBayar() {
+        let jenis = document.querySelector('input[name="pembayaran"]:checked').value;
+        return jenis == "dp" ? "DP (50%)" : "Lunas";
+      }
+
+      function tambah_tanggal() {
+        var container = document.getElementById('container-tanggal');
+        var newElement = document.createElement('div');
+        newElement.className = 'd-flex mt-2';
+        newElement.innerHTML = `
+          <input type="date" class="form-control" id="tanggal" name="tanggal[]" placeholder="" required />
+          <button class="ms-2 btn btn-danger" type="button" onclick="hapus_tanggal(this)">-</button>
+        `;
+        container.appendChild(newElement);
+      }
+
+      function hapus_tanggal(element) {
+        element.parentElement.remove();
+      }
+
+      function newDiskon(){
+        document.getElementById("new_diskon").value = document.getElementById("diskon").value;
+      }
+     </script>
 
 
 
 <script type="text/javascript">
   $(document).ready(function(){
+    $('.select2').select2();
     $('#id_member').change(function(){
       var id=$(this).val();
-      $.ajax({
-        url : "<?php echo site_url();?>?/Penyewaan/get_info_member",
-        method : "POST",
-        data : {id: id},
-        async : false,
-            dataType : 'json',
-        success: function(data){
-         
-        $('#nama_pelanggan').val(data[0].nama_pelanggan);
-        $('#no_telepon').val(data[0].no_telepon);
-          
-        }
-      });
+      if (id != "") {
+        $.ajax({
+          url : "<?php echo site_url();?>?/Penyewaan/get_info_member",
+          method : "POST",
+          data : {id: id},
+          async : false,
+              dataType : 'json',
+          success: function(data){
+            $('#nama_pelanggan').val(data[0].nama_pelanggan);
+            $('#no_telepon').val(data[0].no_telepon);
+          }
+        });
+      }
     });
   });
 </script>

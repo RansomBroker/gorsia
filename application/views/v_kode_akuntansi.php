@@ -81,82 +81,23 @@ data-template="vertical-menu-template-free"
             <div class="container-xxl flex-grow-1 container-p-y">
               <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Akuntansi /</span> Kode Akuntansi</h4>
 
-
-              <div class="row">
-                <?php
-                echo form_open_multipart(site_url().'?/KodeAkuntansi/insert_data'); 
-                ?>
-                <div class="col-xl">
-                  <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                      <h5 class="mb-0">Isi data kode akuntansi</h5>
-                      <small class="text-muted float-end"></small>
-                    </div>
-                    <div class="card-body">
-                      <form>
-                        <div class="mb-3">
-                          <label class="form-label" for="basic-default-fullname">Level</label>
-                          <select class="form-select" id="level" name="level" aria-label="Default select example" required>
-                            <option selected>- - - Pilih - - -</option>
-                            <option value="1"> 1 (Parent) </option>
-                            <option value="2"> 2 </option>
-                          </select>
-                        </div>
-                        <div class="mb-3">
-                          <label class="form-label" for="basic-default-fullname">Parent</label>
-                          <select class="form-select" id="kode_parent" name="kode_parent" aria-label="Default select example" required>
-                            <option selected>- - - Pilih - - -</option>
-                            <?php foreach($get_all_kode_parent as $row) {  
-                              $kode_akun_parent_cb = $row->kode_akun;
-                              $nama_akun_parent_cb = $row->nama_akun;
-                              print "<option value='$kode_akun_parent_cb'>$kode_akun_parent_cb - $nama_akun_parent_cb</option>";
-                            } ?>
-                          </select>
-                        </div>
-                        <div class="mb-3">
-                          <label class="form-label" for="basic-default-company">Kode Akun</label>
-                          <input type="text" class="form-control" id="kode_akun" name="kode_akun" placeholder="Isi kode akun" required />
-                        </div>
-                         <div class="mb-3">
-                          <label class="form-label" for="basic-default-company">Nama Akun</label>
-                          <input type="text" class="form-control" id="nama_akun" name="nama_akun" placeholder="Isi nama akun" required />
-                        </div>
-                         <div class="mb-3">
-                          <label class="form-label" for="basic-default-fullname">Saldo Normal</label>
-                          <select class="form-select" id="saldo_normal" name="saldo_normal" aria-label="Default select example" required>
-                            <option selected>- - - Pilih - - -</option>
-                            <option value="Debet"> Debet </option>
-                            <option value="Kredit"> Kredit </option>
-                          </select>
-                        </div>
-
-                     <div class="mb-3">
-                          <label class="form-label" for="basic-default-fullname">Pos Laporan</label>
-                          <select class="form-select" id="pos" name="pos" aria-label="Default select example" required>
-                            <option selected>- - - Pilih - - -</option>
-                            <option value="Neraca"> Neraca </option>
-                            <option value="Laba Rugi"> Laba Rugi </option>
-                          </select>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-                <?php echo form_close(); ?>
-
-              </div>
-
               <!-- Basic Bootstrap Table -->
+
+              <div id="notifications">
+                <?php echo $this->session->flashdata('msg'); ?>
+              </div>
 
               <div class="card">
 
-                <div id="notifications">
-                  <?php echo $this->session->flashdata('msg'); ?>
+                <div class="card-header">
+                  <h5 class="float-start">
+                    Data Kode Akuntansi
+                  </h5>
+                  <a data-bs-toggle="modal" class="btn btn-primary text-white float-end" data-bs-target="#modal-tambah-data">
+                    <i class="bx bx-plus me-2"></i>
+                    Tambah
+                  </a>
                 </div>
-
-                <h5 class="card-header">Data Kode Akuntansi</h5>
                 <div class="table-responsive text-nowrap">
                   <table class="table">
                     <thead>
@@ -292,6 +233,88 @@ data-template="vertical-menu-template-free"
                 </div>
                 <!--/ Basic Bootstrap Table -->
 
+
+                <!-- Modal Tambah Kode Akuntansi -->
+                <div class="modal fade" id="modal-tambah-data" tabindex="-1" aria-hidden="true" style="display: none;">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel1">Tambah Kode Kode Akuntansi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <?php
+                        echo form_open_multipart(site_url().'?/KodeAkuntansi/insert_data'); 
+                      ?>
+                      <div class="modal-body">
+                        <div class="row">
+                          <div class="col-xl">
+                            <div class="card mb-4">
+                              <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Isi data kode akuntansi</h5>
+                                <small class="text-muted float-end"></small>
+                              </div>
+                              <div class="card-body">
+                                  <div class="mb-3">
+                                    <label class="form-label" for="basic-default-fullname">Level</label>
+                                    <select class="form-select" id="level" name="level" aria-label="Default select example" required>
+                                      <option selected>- - - Pilih - - -</option>
+                                      <option value="1"> 1 (Parent) </option>
+                                      <option value="2"> 2 </option>
+                                    </select>
+                                  </div>
+                                  <div class="mb-3">
+                                    <label class="form-label" for="basic-default-fullname">Parent</label>
+                                    <select class="form-select" id="kode_parent" name="kode_parent" aria-label="Default select example" required>
+                                      <option selected>- - - Pilih - - -</option>
+                                      <?php foreach($get_all_kode_parent as $row) {  
+                                        $kode_akun_parent_cb = $row->kode_akun;
+                                        $nama_akun_parent_cb = $row->nama_akun;
+                                        print "<option value='$kode_akun_parent_cb'>$kode_akun_parent_cb - $nama_akun_parent_cb</option>";
+                                      } ?>
+                                    </select>
+                                  </div>
+                                  <div class="mb-3">
+                                    <label class="form-label" for="basic-default-company">Kode Akun</label>
+                                    <input type="text" class="form-control" id="kode_akun" name="kode_akun" placeholder="Isi kode akun" required />
+                                  </div>
+                                  <div class="mb-3">
+                                    <label class="form-label" for="basic-default-company">Nama Akun</label>
+                                    <input type="text" class="form-control" id="nama_akun" name="nama_akun" placeholder="Isi nama akun" required />
+                                  </div>
+                                  <div class="mb-3">
+                                    <label class="form-label" for="basic-default-fullname">Saldo Normal</label>
+                                    <select class="form-select" id="saldo_normal" name="saldo_normal" aria-label="Default select example" required>
+                                      <option selected>- - - Pilih - - -</option>
+                                      <option value="Debet"> Debet </option>
+                                      <option value="Kredit"> Kredit </option>
+                                    </select>
+                                  </div>
+
+                              <div class="mb-3">
+                                    <label class="form-label" for="basic-default-fullname">Pos Laporan</label>
+                                    <select class="form-select" id="pos" name="pos" aria-label="Default select example" required>
+                                      <option selected>- - - Pilih - - -</option>
+                                      <option value="Neraca"> Neraca </option>
+                                      <option value="Laba Rugi"> Laba Rugi </option>
+                                    </select>
+                                  </div>
+
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                          Tutup
+                        </button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                      </div>
+                      <?php echo form_close(); ?>
+                    </div>
+                  </div>
+                </div>
+                <!--/ Modal Tambah Kode Akuntansi -->
               </div>
 
 
