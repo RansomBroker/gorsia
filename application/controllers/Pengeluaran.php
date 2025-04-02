@@ -189,14 +189,17 @@ class Pengeluaran extends CI_Controller
    public function filter()
    {
       $periode = $this->input->get('periode');
-      $tahun = $this->input->get('tahun');
-      $status = $this->input->get('status');
+      $tahun   = $this->input->get('tahun');
+      $status  = $this->input->get('status');
+
       $data = [
          'dataMember' => $this->M_transaksi_pengeluaran->get_all_pengeluaran_by_month_year($periode, $tahun, $status),
-         'periode' => $periode,
-         'tahun' => $tahun,
-         'status' => $status
+         'periode'    => $periode,
+         'tahun'      => $tahun,
+         'status'     => $status
       ];
-      $this->load->view('v_transaksi_pengeluaran',$data);
+
+      $this->load->view('v_transaksi_pengeluaran', $data);
    }
+
 }
