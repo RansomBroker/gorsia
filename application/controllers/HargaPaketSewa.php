@@ -46,13 +46,13 @@ class HargaPaketSewa extends CI_Controller{
 
   #function insert data
   public function insert_data(){
-
         #input text form
         $id_kategori_olahraga = $this->input->post('id_kategori_olahraga');
         $id_satuan = $this->input->post('id_satuan');
         $harga = $this->input->post('harga');
         $info = $this->input->post('info');
 
+        #validasi form
         #form to array
         $simpan_data=array(
             'id_kategori_olahraga' => $id_kategori_olahraga,

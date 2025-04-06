@@ -339,5 +339,53 @@ data-template="vertical-menu-template-free"
        else return false;
      }</script>
 
+  <script>
+    // Fungsi untuk memformat angka dengan menambahkan titik sebagai pemisah ribuan
+    function formatNumber(input) {
+      // Hapus semua titik dan karakter non-angka
+      let number_string = input.replace(/\./g, '').replace(/[^0-9]/g, '');
+      if (number_string === "") return "";
+      // Tambahkan titik sebagai pemisah ribuan
+      return number_string.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Fungsi untuk menginisialisasi format untuk semua input dengan name "harga"
+    function initHargaInputs() {
+      // Ambil semua elemen input dengan name "harga"
+      const hargaInputs = document.querySelectorAll("input[name='harga']");
+      
+      hargaInputs.forEach(function(hargaInput) {
+        // Format nilai awal (saat memuat halaman) jika ada nilai
+        if (hargaInput.value) {
+          hargaInput.value = formatNumber(hargaInput.value);
+        }
+
+        // Tambahkan event listener untuk format saat mengetik
+        hargaInput.addEventListener("input", function(e) {
+          let cursorPosition = hargaInput.selectionStart;
+          hargaInput.value = formatNumber(hargaInput.value);
+          hargaInput.selectionStart = hargaInput.selectionEnd = cursorPosition;
+        });
+      });
+    }
+
+    // Saat halaman sudah termuat, inisialisasi input harga
+    document.addEventListener("DOMContentLoaded", function() {
+      initHargaInputs();
+
+      // Event listener untuk setiap form agar saat submit nilai harga bersih dari titik
+      document.querySelectorAll("form").forEach(function(formElement) {
+        formElement.addEventListener("submit", function(e) {
+          formElement.querySelectorAll("input[name='harga']").forEach(function(hargaInput) {
+            hargaInput.value = hargaInput.value.replace(/\./g, '');
+          });
+        });
+      });
+    });
+  </script>
+
+
+
+
    </body>
    </html>
