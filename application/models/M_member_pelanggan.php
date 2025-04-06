@@ -14,7 +14,7 @@ class M_member_pelanggan extends CI_Model
     public function getAll()
     {
         $this->db->select('*');
-        $this->db->from('member_pelanggan');
+        $this->db->from('pelanggan');
         $this->db->order_by('id', "asc");
         return $this->db->get()->result_array();
     }
@@ -28,7 +28,7 @@ class M_member_pelanggan extends CI_Model
             // 'status' => $_POST['status'],
         );
 
-        $simpan = $this->db->set($data)->get_compiled_insert('member_pelanggan');
+        $simpan = $this->db->set($data)->get_compiled_insert('pelanggan');
         $sql = str_replace('INSERT INTO', 'INSERT IGNORE INTO', $simpan);
         $this->db->query($simpan);
     }
@@ -36,7 +36,7 @@ class M_member_pelanggan extends CI_Model
     public function editData($id)
     {
         $this->db->select('*');
-        $this->db->from('member_pelanggan');
+        $this->db->from('pelanggan');
         $this->db->where('id', $id);
         return $this->db->get()->row();
     }
@@ -52,7 +52,7 @@ class M_member_pelanggan extends CI_Model
 
         $this->db->where('id', $id);
 
-        return $this->db->update('member_pelanggan', $data);;
+        return $this->db->update('pelanggan', $data);;
     }
 
     public function deleteData($id, $tabel)
@@ -63,7 +63,7 @@ class M_member_pelanggan extends CI_Model
 
     public function cekkodemember()
     {
-        $query = $this->db->query("SELECT MAX(id_member) as id_member from member_pelanggan WHERE id_member<>'NONMEMBER'");
+        $query = $this->db->query("SELECT MAX(id_member) as id_member from pelanggan WHERE id_member<>'NONMEMBER'");
         $hasil = $query->row();
         // var_dump($hasil);
         // die;
