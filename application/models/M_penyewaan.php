@@ -33,15 +33,13 @@ class M_penyewaan extends CI_Model
 
   public function get_all_member()
   {
-    $table= "member_pelanggan"; #nama_table
+    $table= "pelanggan"; #nama_table
     $this->db->order_by("nama_pelanggan", "asc"); #sortir_data
     $this->db->where("id_member<>", "NONMEMBER"); #where kondisi
     // $this->db->where("status", "1"); #where kondisi
     $query = $this->db->get($table);
     return $query->result();
   }
-
-
 
   #function untuk data tabel
   public function get_all_jadwal_sesi()
@@ -76,13 +74,14 @@ class M_penyewaan extends CI_Model
   }
 
   public function get_info_member($id){
-        $hasil=$this->db->query("SELECT * FROM member_pelanggan WHERE id_member='$id'");
+        $hasil=$this->db->query("SELECT * FROM pelanggan WHERE id_member='$id'");
         return $hasil->result();
 
     }
 
   
-  #function untuk menyimpan data
+  
+    #function untuk menyimpan data
   public function insert_data_pilih_lapangan($simpan_data, $id_transaksi)
   {
     #nama_table

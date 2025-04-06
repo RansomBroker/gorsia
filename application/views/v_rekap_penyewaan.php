@@ -163,107 +163,74 @@ data-template="vertical-menu-template-free"
                               </form>
                                     <table id="myTable" class="table table-bordered table-striped dataTable no-footer" role="grid" aria-describedby="myTable" style="padding: 5px; font-size: 12px; white-space: nowrap;">
                                         <thead>
-                                <tr role="row">
-                                  <th>ID. Trx</th>
-                                  <th>Tanggal</th>
-                                  <th>Pelanggan</th>
-                                  <th>Telpon</th>
-                                  <th>ID. Member</th>
-                                  <th>Olahraga</th>
-                                  <th>Lapangan</th>
-                                  <th>Lama Sewa</th>
-                                  <th>Harga</th>
-                                  <th>Total</th>
-                                  <th>Status</th>
-                                  <th>Edit</th>
-                                  <th>Hapus</th>
+                                            <tr role="row">
+                                                <th>ID. Trx</th>
+                                                <th>Tanggal</th>
+                                                <th>Pelanggan</th>
+                                                <th>Lapangan</th>
+                                                <th>Jumlah Sesi</th>
+                                                <th>Total</th>
+                                                <th>Status</th>
+                                                <th>Detail</th>
+                                                <th>Hapus</th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr role="row">
+                                                <th>ID. Trx</th>
+                                                <th>Tanggal</th>
+                                                <th>Pelanggan</th>
+                                                <th>Lapangan</th>
+                                                <th>Jumlah Sesi</th>
+                                                <th>Total</th>
+                                                <th>Status</th>
+                                                <th>Detail</th>
+                                                <th>Hapus</th>
+                                            </tr>
+                                        </tfoot>
+                                        <tbody>
+                                            <?php foreach($get_all_rekap_penyewaan as $row) {    
+                                                $id_transaksi        = $row->id_transaksi;
+                                                $tanggal             = $row->tanggal;
+                                                $nama_pelanggan      = $row->nama_pelanggan;
+                                                $lama_sewa           = $row->lama_sewa;
+                                                $total               = $row->total - $row->diskon;
+                                                $status_transaksi    = $row->status_transaksi;
 
-                                </tr>
-                            </thead>
-                            <tfoot id="filter-table">
-                                <tr role="row">
-                                   <th>ID. Trx</th>
-                                  <th>Tanggal</th>
-                                  <th>Pelanggan</th>
-                                  <th>Telpon</th>
-                                  <th>ID. Member</th>
-                                  <th>Olahraga</th>
-                                  <th>Lapangan</th>
-                                  <th>Lama Sewa</th>
-                                  <th>Harga</th>
-                                  <th>Total</th>
-                                  <th>Status</th>
-                                 <th>Edit</th>
-                                    <th>Hapus</th>
+                                                // Get lapangan name
+                                                $id_lapangan = $row->id_lapangan;
+                                                $rows_lapangan = $this->db->query("SELECT nama_lapangan FROM lapangan WHERE id_lapangan='$id_lapangan'")->row_array();
+                                                $nama_lapangan = $rows_lapangan ? $rows_lapangan['nama_lapangan'] : '-';
 
-                                    
-                            </tfoot>
-                            <tbody>
+                                                // Get satuan sewa
+                                                $id_paket_sewa = $row->id_paket_sewa;
+                                                $rows_paket = $this->db->query("SELECT id_satuan FROM paket_sewa WHERE id_paket_sewa='$id_paket_sewa'")->row_array();
+                                                $id_satuan = $rows_paket ? $rows_paket['id_satuan'] : 0;
 
+                                                $rows_satuan = $this->db->query("SELECT satuan_sewa FROM satuan_sewa WHERE id_satuan_sewa='$id_satuan'")->row_array();
+                                                $satuan_sewa = $rows_satuan ? $rows_satuan['satuan_sewa'] : '';
 
-                                  <?php foreach($get_all_rekap_penyewaan as $row) {    
-
-                                      $id_transaksi = $row->id_transaksi;
-                      $tanggal = $row->tanggal;
-                      $nama_pelanggan= $row->nama_pelanggan;
-                      $no_telepon= $row->no_telepon;
-                      $member= $row->member;
-                      $id_member= $row->id_member;
-                      $id_kategori_olahraga= $row->id_kategori_olahraga;
-                      $id_paket_sewa= $row->id_paket_sewa;
-                      $id_lapangan= $row->id_lapangan;
-                      $lama_sewa= $row->lama_sewa;
-                      $harga= $row->harga;
-                      $total= $row->total;
-                      $status_transaksi= $row->status_transaksi;
-                      $created_by= $row->created_by;
-
-                      #kategori olahraga
-                      $rows_kategori_or = $this->db->query("SELECT * FROM kategori_olahraga where id_kategori_olahraga='".$id_kategori_olahraga."'")->row_array();
-                      $kategori_olahraga=$rows_kategori_or['kategori_olahraga'];
-
-                      #paket sewa
-                      $rows_paket = $this->db->query("SELECT * FROM paket_sewa where id_paket_sewa='".$id_paket_sewa."'")->row_array();
-                      $id_satuan=($rows_paket) ? $rows_paket['id_satuan'] : 0;
-
-                      #satuan
-                      $rows_satuan = $this->db->query("SELECT * FROM satuan_sewa where id_satuan_sewa='".$id_satuan."'")->row_array();
-                      $satuan_sewa=($rows_satuan) ? $rows_satuan['satuan_sewa'] : '';
-
-                      #lapangan
-                      $rows_lapangan = $this->db->query("SELECT * FROM lapangan where id_lapangan='".$id_lapangan."'")->row_array();
-                      $nama_lapangan=$rows_lapangan['nama_lapangan'];
-
-                                      echo '<tr role="row" >
-                                      <td>'.$id_transaksi.'</td>
-                      <td>'.date("d/m/Y", strtotime($tanggal)).'</td>
-                      <td>'.$nama_pelanggan.'</td>
-                      <td>'.$no_telepon.'</td>
-                      <td>'.$id_member.'</td>
-                      <td>'.$kategori_olahraga.'</td>
-                      <td>'.$nama_lapangan.'</td>
-                      <td>'.$lama_sewa.' '.$satuan_sewa.'</td>
-                      <td>'.number_format($harga).'</td>
-                      <td>'.number_format($total).'</td>
-                      <td>'.$status_transaksi.'</td>
-                      <td align="center">';
-                      if ($akses_update=="Aktif"){
-                        echo '<a href="'.site_url().'?/Penyewaan/view/idtrx/'.$id_transaksi.'"><i class="bx bx-edit-alt"></i></a>' ;}
-
-                        echo '</td>
-
-                        <td align="center">';
-
-                        if ($akses_delete=="Aktif"){
-                          echo '<a onclick="return konfirm_hapus()" href="'.site_url().'?/RekapPenyewaan/delete_data/id/'.$id_transaksi.'"><i class="bx bx-trash-alt"></i></a>';}
-                          echo '</td>
-
-                          </tr>';
-
-                        }  ?>
-
-
-                            </tbody>
+                                                echo '<tr role="row">
+                                                    <td>'.$id_transaksi.'</td>
+                                                    <td>'.date("d/m/Y", strtotime($tanggal)).'</td>
+                                                    <td>'.$nama_pelanggan.'</td>
+                                                    <td>'.$nama_lapangan.'</td>
+                                                    <td>'.$lama_sewa.' '.$satuan_sewa.'</td>
+                                                    <td>'.number_format($total).'</td>
+                                                    <td>'.$status_transaksi.'</td>
+                                                    <td align="center">
+                                                        <a href="'.site_url().'?/Penyewaan/view/idtrx/'.$id_transaksi.'">
+                                                            <i class="bx bx-detail"></i>
+                                                        </a>
+                                                    </td>
+                                                    <td align="center">
+                                                        <a onclick="return konfirm_hapus()" href="'.site_url().'?/RekapPenyewaan/delete_data/id/'.$id_transaksi.'">
+                                                            <i class="bx bx-trash-alt"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>';
+                                            } ?>
+                                        </tbody>
                                     </table>
                                 </div>
 
