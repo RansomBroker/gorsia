@@ -2,9 +2,6 @@
 include_once 'v_user_config.php';
 ?>
 
-
-?>
-
 <!DOCTYPE html>
 
 <!-- beautify ignore:start -->
@@ -115,13 +112,10 @@ data-template="vertical-menu-template-free"
                                     <table id="myTable" class="table table-bordered table-striped dataTable no-footer" role="grid" aria-describedby="myTable" style="padding: 5px; font-size: 12px; white-space: nowrap;">
                                         <thead>
                                 <tr role="row">
-                                    <th><b>Periode</b></th>
                                     <th><b>Jenis Jurnal</b></th>
                                     <th><b>No. Bukti</b></th>
                                     <th><b>Tanggal</b></th>
                                     <th><b>Referensi</b></th>
-                                    <th><b>Dari</b></th>
-                                    <th><b>Kepada</b></th>
                                     <th><b>Keterangan</b></th>
                                     <th><b>Edit</b></th>
                                     <th><b>Hapus</b></th>
@@ -130,13 +124,10 @@ data-template="vertical-menu-template-free"
                             </thead>
                             <tfoot id="filter-table">
                                 <tr role="row">
-                                    <th>Periode</th>
                                     <th>Jenis Jurnal</th>
                                     <th>No. Bukti</th>
                                     <th>Tanggal</th>
                                     <th>Referensi</th>
-                                    <th>Dari</th>
-                                    <th>Kepada</th>
                                     <th>Keterangan</th>
                                     <th>Edit</th>
                                     <th>Hapus</th>
@@ -148,27 +139,26 @@ data-template="vertical-menu-template-free"
                                   <?php foreach($get_all_data_jurnal as $row) {    
 
                                       $id_jurnal = $row->id_jurnal;
-                                      $periode = $row->periode;
                                       $no_bukti = $row->no_bukti;
                                       $tanggal = $row->tanggal;
                                       $no_referensi = $row->no_referensi;
                                       $keterangan = $row->keterangan;
-                                      $dari = $row->dari;
-                                      $kepada = $row->kepada;
                                       $kode_jenis_jurnal = $row->kode_jenis_jurnal;
 
                                       #kode jenis jurnal
-                                      $rows_jn = $this->db->query("SELECT * FROM kode_jenis_jurnal where kode_jenis_jurnal='".$kode_jenis_jurnal."'")->row_array();
-                                      $deskripsi_jenis_jurnal_view=$rows_jn['deskripsi'];
+                                      $rows_jn = $this->db->query("SELECT * FROM kode_jenis_jurnal WHERE kode_jenis_jurnal='".$kode_jenis_jurnal."'")->row_array();
+                                      $deskripsi_jenis_jurnal_view = '-';
+                                      if (!empty($rows_jn)) {
+                                          $deskripsi_jenis_jurnal_view = $rows_jn['deskripsi'];
+                                      }
 
                                       echo '<tr role="row" >
-                                      <td>'.$periode.'</td>
+                                      
                                       <td>'.$kode_jenis_jurnal.' - '.$deskripsi_jenis_jurnal_view.'</td>
                                       <td>'.$no_bukti.'</td>
                                       <td>'.date("d/m/Y", strtotime($tanggal)).'</td>
                                       <td>'.$no_referensi.'</td>
-                                      <td>'.$dari.'</td>
-                                      <td>'.$kepada.'</td>
+                                      
                                       <td>'.$keterangan.'</td>
 
                                       <td align="center">';

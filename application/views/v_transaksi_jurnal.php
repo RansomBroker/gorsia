@@ -9,8 +9,6 @@ include_once 'v_user_config.php';
   $kode_jenis_jurnal_view                   = $row->kode_jenis_jurnal;
   $tanggal_view                             = $row->tanggal;
   $no_referensi_view                        = $row->no_referensi;
-  $dari_view                                = $row->dari;
-  $kepada_view                              = $row->kepada;
   $keterangan_view                          = $row->keterangan;
 
   #kode jenis jurnal
@@ -183,15 +181,7 @@ data-template="vertical-menu-template-free"
                           <label class="form-label" for="basic-default-company">No. Referensi</label>
                           <input class="form-control" type="text" id="no_referensi" name="no_referensi" placeholder="No. Referensi"  value="<?php if(isset($no_bukti_view)){ echo $no_referensi_view; } ?>" autocomplete="off" />
                         </div>
-                         <div class="mb-3">
-                          <label class="form-label" for="basic-default-fullname">Dari</label>
-                          <input class="form-control" type="text" id="dari" name="dari" placeholder="Dari"  value="<?php if(isset($no_bukti_view)){ echo $dari_view; } ?>" autocomplete="off" />
-                        </div>
 
-                          <div class="mb-3">
-                          <label class="form-label" for="basic-default-fullname">Kepada</label>
-                          <input class="form-control" type="text" id="kepada" name="kepada" placeholder="Kepada"  value="<?php if(isset($no_bukti_view)){ echo $kepada_view; } ?>" autocomplete="off" />
-                        </div>
 
                      <div class="mb-3">
                           <label class="form-label" for="basic-default-fullname">Keterangan</label>

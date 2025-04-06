@@ -96,87 +96,64 @@ class TransaksiJurnal extends CI_Controller{
 
     }#end function index
 
+    #function insert data
+    public function insert_data(){
 
-  #function insert data
-  public function insert_data(){
+      $kode_jenis_jurnal   = $this->input->post('kode_jenis_jurnal');
 
-        #input text form
-        $no_bukti       = date("Y", strtotime($this->input->post('tanggal')));
-        $periode        = date("Ym", strtotime($this->input->post('tanggal')));
-        $tanggal_now    = date("dmY", strtotime($this->input->post('tanggal')));
-        $kode_jenis_jurnal   = $this->input->post('kode_jenis_jurnal');
+      #input text form
+      $tanggal_now    = date("dmY", strtotime($this->input->post('tanggal')));
+      $tanggal_now    = $this->input->post('tanggal');
 
-        #read max number
-        $rows_lastnumb  = $this->db->query("SELECT max(last_numb_perperiode) as max_data FROM jurnal_umum where periode='".$periode."'")->row_array();
-        $max_data       = doubleval($rows_lastnumb['max_data']);
-        $last_numb      = $max_data+1;
+      #generate no_bukti otomatis tanpa kode jenis jurnal & last_numb_perperiode
+      $no_bukti = $kode_jenis_jurnal . date("YmdHis");
 
+      $no_referensi        = $this->input->post('no_referensi');
+      $keterangan          = $this->input->post('keterangan');
+      $user_created        = $this->session->username;
+      $created_at          = date("Y-m-d H:i:s");
 
-        $no_bukti       = $kode_jenis_jurnal.'00'.$last_numb.'-'.$periode;
+      #variabel array
+      $simpan_data=array(
+          'no_bukti'        => $no_bukti,
+          'tanggal'         => $tanggal_now,
+          'kode_jenis_jurnal' => $kode_jenis_jurnal,
+          'no_referensi'    => $no_referensi,
+          'keterangan'      => $keterangan,
+          'user_created'    => $user_created,
+          'created_at'      => $created_at
+      );
 
-        #form input
-        $tanggal_now         = $this->input->post('tanggal');
-        $no_referensi        = $this->input->post('no_referensi');
-        $dari                = $this->input->post('dari');
-        $kepada              = $this->input->post('kepada');
-        $keterangan          = $this->input->post('keterangan');
-        $user_created = $this->session->username;
-        $created_at = date("Y-m-d H:i:s");
-
-        #variabel array
-        $simpan_data=array(
-            'periode'               => $periode,
-            'last_numb_perperiode'  => $last_numb,
-            'kode_jenis_jurnal'     => $kode_jenis_jurnal,
-            'no_bukti'              => $no_bukti,
-            'tanggal'               => $tanggal_now,
-            'no_referensi'          => $no_referensi,
-            'dari'                  => $dari,
-            'kepada'                => $kepada,
-            'keterangan'            => $keterangan,
-            'user_created'          => $user_created,
-            'created_at'            => $created_at
-        );
-
-        #send to model
-        $this->M_transaksi_jurnal->insert_data($simpan_data, $no_bukti);
-
+      #send to model
+      $this->M_transaksi_jurnal->insert_data($simpan_data, $no_bukti);
     }
-
-
-  #function untuk ambil inputan form untuk update data
-  public function update_data(){
+  
+    #function untuk ambil inputan form untuk update data
+      public function update_data(){
 
         #form input
         $no_bukti            = $this->input->post('no_bukti');
-        $tanggal_now         = date("dmY", strtotime($this->input->post('tanggal')));
-        $periode             = date("Ym", strtotime($this->input->post('tanggal')));
-
         $tanggal_now         = $this->input->post('tanggal');
         $no_referensi        = $this->input->post('no_referensi');
-        $dari                = $this->input->post('dari');
-        $kepada              = $this->input->post('kepada');
         $keterangan          = $this->input->post('keterangan');
         $modified_at         = date("Y-m-d H:i:s");
         $user_modified       = $this->session->username;
+        $kode_jenis_jurnal   = $this->input->post('kode_jenis_jurnal');
+
 
         #form to array
         $simpan_data=array(
-            'no_referensi'               => $no_referensi,
-            'periode'               => $periode,
-            'tanggal'               => $tanggal_now,
-            'dari'               => $dari,
-            'kepada'               => $kepada,
-            'keterangan'               => $keterangan,
-            'modified_at'      => $modified_at,
-            'user_modified'      => $user_modified,
-
+            'no_referensi'   => $no_referensi,
+            'tanggal'        => $tanggal_now,
+            'keterangan'     => $keterangan,
+            'modified_at'    => $modified_at,
+            'kode_jenis_jurnal' => $kode_jenis_jurnal,
+            'user_modified'  => $user_modified,
         );
-      
+
         #send to model
         $this->M_transaksi_jurnal->update_data($no_bukti, $simpan_data);
-
-    }
+      }
 
 
     #function hapus data

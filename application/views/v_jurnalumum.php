@@ -97,15 +97,20 @@ data-template="vertical-menu-template-free"
                 </div>
 
                 <div class="card-body">
-                              <?php
-                                // Jika variabel filter belum ada (misalnya, saat halaman pertama kali dimuat), set default-nya.
-                                if (!isset($periode) || empty($periode)) {
-                                  $periode = date('m'); // Format 2 digit: '01', '02', dst.
-                                }
-                                if (!isset($tahun) || empty($tahun)) {
-                                  $tahun = date('Y');
-                                }
-                              ?>
+                <?php
+                  // Tangkap parameter dari URL jika ada
+                  $periode = isset($_GET['periode']) ? $_GET['periode'] : '';
+                  $tahun = isset($_GET['tahun']) ? $_GET['tahun'] : '';
+
+                  // Jika kosong, set default
+                  if (empty($periode)) {
+                    $periode = date('m');
+                  }
+                  if (empty($tahun)) {
+                    $tahun = date('Y');
+                  }
+                ?>
+
                               <form action="<?=site_url()?>/JurnalUmum"  method="GET">
                                   <div class="row mb-3">
                                       <div class="col-md-4">
