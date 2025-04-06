@@ -97,44 +97,53 @@ data-template="vertical-menu-template-free"
                 </div>
 
                 <div class="card-body">
-                  <form action="<?=site_url()?>/JurnalUmum/filter" method="GET">
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                          <label for="periode" class="form-label">Periode (Bulan)</label>
-                          <select class="form-control" id="periode" name="periode" required>
-                            <option value="">Pilih Bulan</option>
-                            <?php 
-                            $months = [
-                              '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
-                              '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
-                              '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
-                            ];
-                            foreach ($months as $num => $name) {
-                              $selected = (!empty($periode) && $periode == $num) ? 'selected' : '';
-                              echo "<option value='$num' $selected>$name</option>";
-                            }
-                            ?>
-                          </select>
-                        </div>
-                        <div class="col-md-4">
-                          <label for="tahun" class="form-label">Tahun</label>
-                          <select class="form-control" id="tahun" name="tahun" required>
-                          <option value="">Pilih Tahun</option>
-                          <?php 
-                          $currentYear = date('Y');
-                          for ($i = $currentYear; $i >= $currentYear - 2; $i--) {
-                            $selected = (!empty($tahun) && $tahun == $i) ? 'selected' : '';
-                            echo "<option value='$i' $selected>$i</option>";
-                          }
-                          ?>
-                          </select>
-                        </div>
-                      <div class="col-md-4 d-flex gap-3 align-items-end justify-content-end">
-                        <button type="submit" class="btn btn-primary" id="filter_btn">Filter</button>
-                        <a href="<?=site_url()?>/JurnalUmum" class="btn btn-secondary" id="reset_btn">Reset</a>
-                      </div>
-                    </div>
-                  </form>
+                              <?php
+                                // Jika variabel filter belum ada (misalnya, saat halaman pertama kali dimuat), set default-nya.
+                                if (!isset($periode) || empty($periode)) {
+                                  $periode = date('m'); // Format 2 digit: '01', '02', dst.
+                                }
+                                if (!isset($tahun) || empty($tahun)) {
+                                  $tahun = date('Y');
+                                }
+                              ?>
+                              <form action="<?=site_url()?>/JurnalUmum"  method="GET">
+                                  <div class="row mb-3">
+                                      <div class="col-md-4">
+                                          <label for="periode" class="form-label">Periode (Bulan)</label>
+                                          <select class="form-control" id="periode" name="periode" required>
+                                              <option value="">Pilih Bulan</option>
+                                              <?php 
+                                              $months = [
+                                                  '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
+                                                  '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
+                                                  '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+                                              ];
+                                              foreach ($months as $num => $name) {
+                                                  $selected = ($periode == $num) ? 'selected' : '';
+                                                  echo "<option value='$num' $selected>$name</option>";
+                                              }
+                                              ?>
+                                          </select>
+                                      </div>
+                                      <div class="col-md-4">
+                                          <label for="tahun" class="form-label">Tahun</label>
+                                          <select class="form-control" id="tahun" name="tahun" required>
+                                              <option value="">Pilih Tahun</option>
+                                              <?php 
+                                              $currentYear = date('Y');
+                                              for ($i = $currentYear; $i >= $currentYear - 2; $i--) {
+                                                  $selected = ($tahun == $i) ? 'selected' : '';
+                                                  echo "<option value='$i' $selected>$i</option>";
+                                              }
+                                              ?>
+                                          </select>
+                                      </div>
+                                      <div class="col-md-4 d-flex gap-3 align-items-end justify-content-end">
+                                          <button type="submit" class="btn btn-primary" id="filter_btn">Filter</button>
+                                          <a href="<?=site_url()?>/RekapPenyewaan" class="btn btn-secondary" id="reset_btn">Reset</a>
+                                      </div>
+                                  </div>
+                              </form>
                   <table class="table table-responsive table-borderless">
                     <thead class="border-top-0 border-start-0 border-end-0 border-2 border-dark">
                       <tr>

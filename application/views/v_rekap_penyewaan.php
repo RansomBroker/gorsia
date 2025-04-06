@@ -336,11 +336,11 @@ data-template="vertical-menu-template-free"
     <script src="<?=base_url()?>/assets/plugins/datatables/jquery.dataTables.min.js"></script>
 
     <script src="<?=base_url()?>/assets_pages/bundles/datatablescripts.bundle.js"></script>
-<script src="<?=base_url()?>/assets/vendor/jquery-datatable/buttons/dataTables.buttons.min.js"></script>
-<script src="<?=base_url()?>/assets/vendor/jquery-datatable/buttons/buttons.bootstrap4.min.js"></script>
-<script src="<?=base_url()?>/assets/vendor/jquery-datatable/buttons/buttons.colVis.min.js"></script>
-<script src="<?=base_url()?>/assets/vendor/jquery-datatable/buttons/buttons.html5.min.js"></script>
-<script src="<?=base_url()?>/assets/vendor/jquery-datatable/buttons/buttons.print.min.js"></script>
+    <script src="<?=base_url()?>/assets/vendor/jquery-datatable/buttons/dataTables.buttons.min.js"></script>
+    <script src="<?=base_url()?>/assets/vendor/jquery-datatable/buttons/buttons.bootstrap4.min.js"></script>
+    <script src="<?=base_url()?>/assets/vendor/jquery-datatable/buttons/buttons.colVis.min.js"></script>
+    <script src="<?=base_url()?>/assets/vendor/jquery-datatable/buttons/buttons.html5.min.js"></script>
+    <script src="<?=base_url()?>/assets/vendor/jquery-datatable/buttons/buttons.print.min.js"></script>
 
     <!-- DATA TABLE SCRIPTS -->
     <script src="<?=base_url()?>/assets/exportdataTables/dataTables.buttons.min.js"></script>

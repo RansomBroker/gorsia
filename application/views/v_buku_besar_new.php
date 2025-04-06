@@ -149,60 +149,77 @@ data-template="vertical-menu-template-free"
 
 
                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <?php echo form_open_multipart(site_url().'?/BukuBesar/filterpencarian'); ?>
-                                            <div class="row mb-3">
-                                                <div class="col-md-3">
-                                                    <label for="txt_id_akun" class="form-label">Kode Akuntansi</label>
-                                                    <select multiple class="form-select" style="width: 100%" name="txt_id_akun[]" id="txt_id_akun" required=""  >
-                                                        <option value="all" <?=in_array('all',$param_id_akun)?'selected':''?>> Semua </option>
-                                                        <?php foreach($get_all_data_akun as $row) {  
-                                                            $id_kode_akuntansi_cb= $row->id_kode_akuntansi;
-                                                            $kode_akun_cb = $row->kode_akun;
-                                                            $nama_akun_cb = $row->nama_akun;
-                                                            $selected = in_array($row->id_kode_akuntansi,$param_id_akun) ? 'selected' : '';
-                                                            print "<option value='$id_kode_akuntansi_cb' $selected>$kode_akun_cb - $nama_akun_cb</option>";
-                                                        } ?>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="periode" class="form-label">Periode (Bulan)</label>
-                                                    <select class="form-control" id="periode" name="periode" required>
-                                                        <option value="">Pilih Bulan</option>
-                                                        <?php 
-                                                        $months = [
-                                                            '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
-                                                            '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
-                                                            '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
-                                                        ];
-                                                        foreach ($months as $num => $name) {
-                                                            $selected = (!empty($periode) && $periode == $num) ? 'selected' : '';
-                                                            echo "<option value='$num' $selected>$name</option>";
-                                                        }
-                                                        ?>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="tahun" class="form-label">Tahun</label>
-                                                    <select class="form-control" id="tahun" name="tahun" required>
+                               <?php 
+                                // Inisialisasi default jika variabel belum didefinisikan
+                                if (!isset($periode) || empty($periode)) {
+                                    $periode = date('m'); // misalnya "05" untuk Mei
+                                }
+                                if (!isset($tahun) || empty($tahun)) {
+                                    $tahun = date('Y');
+                                }
+                                if (!isset($param_id_akun)) {
+                                    $param_id_akun = ['all']; // default: semua akun
+                                }
+                                ?>
+                                <div class="col-sm-12">
+                                    <?php echo form_open_multipart(site_url('/BukuBesar/filterpencarian'), ['method' => 'GET']); ?>
+                                        <div class="row mb-3">
+                                            <!-- Filter Kode Akuntansi -->
+                                            <div class="col-md-3">
+                                                <label for="txt_id_akun" class="form-label">Kode Akuntansi</label>
+                                                <select multiple class="form-select" style="width: 100%" name="txt_id_akun[]" id="txt_id_akun" required>
+                                                    <option value="all" <?= in_array('all', $param_id_akun) ? 'selected' : '' ?>>Semua</option>
+                                                    <?php 
+                                                    foreach ($get_all_data_akun as $row) {  
+                                                        $id_kode_akuntansi_cb = $row->id_kode_akuntansi;
+                                                        $kode_akun_cb = $row->kode_akun;
+                                                        $nama_akun_cb = $row->nama_akun;
+                                                        $selected = in_array($row->id_kode_akuntansi, $param_id_akun) ? 'selected' : '';
+                                                        echo "<option value='$id_kode_akuntansi_cb' $selected>$kode_akun_cb - $nama_akun_cb</option>";
+                                                    } 
+                                                    ?>
+                                                </select>
+                                            </div>
+                                            <!-- Filter Periode (Bulan) -->
+                                            <div class="col-md-3">
+                                                <label for="periode" class="form-label">Periode (Bulan)</label>
+                                                <select class="form-control" id="periode" name="periode" required>
+                                                    <option value="">Pilih Bulan</option>
+                                                    <?php 
+                                                    $months = [
+                                                        '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
+                                                        '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
+                                                        '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+                                                    ];
+                                                    foreach ($months as $num => $name) {
+                                                        $selected = ($periode == $num) ? 'selected' : '';
+                                                        echo "<option value='$num' $selected>$name</option>";
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                            <!-- Filter Tahun -->
+                                            <div class="col-md-3">
+                                                <label for="tahun" class="form-label">Tahun</label>
+                                                <select class="form-control" id="tahun" name="tahun" required>
                                                     <option value="">Pilih Tahun</option>
                                                     <?php 
                                                     $currentYear = date('Y');
                                                     for ($i = $currentYear; $i >= $currentYear - 2; $i--) {
-                                                        $selected = (!empty($tahun) && $tahun == $i) ? 'selected' : '';
+                                                        $selected = ($tahun == $i) ? 'selected' : '';
                                                         echo "<option value='$i' $selected>$i</option>";
                                                     }
                                                     ?>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3 d-flex gap-3 align-items-end justify-content-end">
-                                                    <button type="submit" class="btn btn-primary" id="filter_btn"><i class="bx bx-search-alt-2"></i> Filter</button>
-                                                    <a href="<?=site_url()?>/BukuBesar" class="btn btn-secondary" id="reset_btn">Reset</a>
-                                                </div>
+                                                </select>
                                             </div>
-                                        <?php echo form_close(); ?>
-
-                                    </div>
+                                            <!-- Tombol Filter & Reset -->
+                                            <div class="col-md-3 d-flex gap-3 align-items-end justify-content-end">
+                                                <button type="submit" class="btn btn-primary" id="filter_btn"><i class="bx bx-search-alt-2"></i> Filter</button>
+                                                <a href="<?= site_url() ?>?/BukuBesar" class="btn btn-secondary" id="reset_btn">Reset</a>
+                                            </div>
+                                        </div>
+                                    <?php echo form_close(); ?>
+                                </div>
                                 </div>
 
                                 <br>

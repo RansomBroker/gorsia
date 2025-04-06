@@ -33,14 +33,20 @@ class JurnalUmum extends CI_Controller{
 	}
 
 	#menampilkan halaman utama controller
-	public function index(){
-      #kondisi akses & menu
+	public function index() {
+      // Ambil bulan dan tahun berjalan
+      $periode = date('m');
+      $tahun = date('Y');
+  
       $data = [
-         'jurnal' => $this->M_jurnal_umum->get_all_jurnal()
+          'jurnal' => $this->M_jurnal_umum->get_all_jurnal_filter_by_month_year($periode, $tahun),
+          'periode' => $periode,
+          'tahun' => $tahun
       ];
-      $this->load->view('v_jurnalumum',$data);
-
-	}
+  
+      $this->load->view('v_jurnalumum', $data);
+  }
+  
    #end function index
 
 
