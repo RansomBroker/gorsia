@@ -211,13 +211,6 @@ $data_hak_akses = $query->row();
                     <div data-i18n="Without menu">Pengeluaran</div>
                 </a>
             </li>
-        
-            <li class="menu-item">
-                <a href="<?= site_url(); ?>?/Pembelian" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-cart"></i>
-                    <div data-i18n="Without menu">Pembelian</div>
-                </a>
-            </li>
         <?php } ?>
 
         <?php if($data_hak_akses->menu_akuntansi == 'Aktif') {?>
