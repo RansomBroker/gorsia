@@ -3,6 +3,7 @@
 application/cache/*
 !application/cache/index.html
 !application/cache/.htaccess
+node_modules
 
 application/logs/*
 !application/logs/index.html
