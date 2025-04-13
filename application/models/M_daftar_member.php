@@ -1,9 +1,7 @@
 <?php
 
-
 class M_daftar_member extends CI_Model
 {
-
     function __construct()
     {
         parent::__construct();
@@ -16,7 +14,7 @@ class M_daftar_member extends CI_Model
         $this->db->select('*');
         $this->db->from('member');
         // $this->db->join('paket_sewa', 'paket_sewa.id_paket_sewa = member.paketID');
-        $this->db->order_by('id', "asc");
+        $this->db->order_by('id', 'asc');
         return $this->db->get()->result_array();
     }
 
@@ -42,20 +40,18 @@ class M_daftar_member extends CI_Model
             'created_at' => date('Y-m-d'),
         ];
 
-
         $simpan = $this->db->set($data)->get_compiled_insert('member');
         $sql = str_replace('INSERT INTO', 'INSERT IGNORE INTO', $simpan);
         $this->db->query($simpan);
         $data = ['status' => true, 'IdSimpan' => $this->db->insert_id()];
         return $data;
     }
-    
+
     public function simpanDataDetail($kodeTransaksi, $hargaPaket)
     {
         $durasiMember = $_POST['durasi_member'];
         $startDate = $_POST['tanggal_mulai'];
         $Expired = date('Y-m-d', strtotime($startDate . ' + ' . $durasiMember . ' days'));
-
 
         // $idtransaksi = $this->db->insert_id();
         // var_dump($durasiMember);
@@ -85,14 +81,11 @@ class M_daftar_member extends CI_Model
         return $data;
     }
 
-
     public function updateData($id)
     {
-
         $durasiMember = $_POST['durasi_member'];
         $startDate = $_POST['tanggal_mulai'];
         $Expired = date('Y-m-d', strtotime($startDate . ' + ' . $durasiMember . ' days'));
-
 
         // $idtransaksi = $this->db->insert_id();
         // var_dump($durasiMember);
@@ -137,13 +130,13 @@ class M_daftar_member extends CI_Model
         $this->db->select('*');
         $this->db->from('member_trx');
         $this->db->where('memberID', $id);
-        $this->db->order_by('id', "asc");
+        $this->db->order_by('id', 'asc');
         return $this->db->get()->result_array();
     }
 
     public function cekkodemember()
     {
-        $query = $this->db->query("SELECT MAX(kodeMember) as kodemember from member");
+        $query = $this->db->query('SELECT MAX(kodeMember) as kodemember from member');
         $hasil = $query->row();
         // var_dump($hasil);
         // die;
@@ -151,7 +144,7 @@ class M_daftar_member extends CI_Model
     }
     public function cekkotransaksi()
     {
-        $query = $this->db->query("SELECT MAX(nomorTransaksi) as kodeTransaksi from member_trx");
+        $query = $this->db->query('SELECT MAX(nomorTransaksi) as kodeTransaksi from member_trx');
         $hasil = $query->row();
         // var_dump($hasil);
         // die;cekkotransaksi
@@ -160,10 +153,27 @@ class M_daftar_member extends CI_Model
 
     public function cekidtransaksi()
     {
-        $query = $this->db->query("SELECT MAX(id) as kodeTransaksi from member_trx");
+        $query = $this->db->query('SELECT MAX(id) as kodeTransaksi from member_trx');
         $hasil = $query->row();
         // var_dump($hasil);
         // die;cekkotransaksi
         return $hasil->kodeTransaksi;
+    }
+
+    // Ambil data transaksi berdasarkan ID
+    public function getNotaUtama($id_transaksi)
+    {
+        $this->db->select('member_trx.*, member.nama, member.kodeMember');
+        $this->db->from('member_trx');
+        $this->db->join('member', 'member.id = member_trx.memberID');
+        $this->db->where('member_trx.id', $id_transaksi);
+        return $this->db->get()->row_array();
+    }
+
+    // (Opsional jika ada tabel detail lain)
+    public function getNotaDetail($id_transaksi)
+    {
+        $this->db->where('id_transaksi', $id_transaksi);
+        return $this->db->get('transaksi_detail')->result_array();
     }
 }

@@ -1,6 +1,5 @@
 <?php
-include_once 'v_user_config.php';
-?>
+include_once 'v_user_config.php'; ?>
 
 <!DOCTYPE html>
 
@@ -114,12 +113,12 @@ tr:nth-child(even) {
                               <h4><u><b>Status Member</b></u></h4>
                               <h5><?php if ($dataMember->expired_member == date('Y-m-d')) { ?>
                                 <span class="badge bg-danger">Expired</span>
-                               <?php } else {  ?> <span class="badge bg-success"> Aktif</span><?php } ?></h5>
+                               <?php } else { ?> <span class="badge bg-success"> Aktif</span><?php } ?></h5>
                             </div>
                           </div>
                           <div class="row">
                             <div class="col-md-5 mt-3" >
-                              <a href="<?= site_url(); ?>?/DaftarMember" class="btn btn-success">
+                              <a href="<?= site_url() ?>?/DaftarMember" class="btn btn-success">
                                   <span class="tf-icons bx bx-arrow-back"></span>&nbsp; Kembali
                               </a>
                             </div>
@@ -143,6 +142,7 @@ tr:nth-child(even) {
                           <th>Total bayar</th>
                           <th>Tanggal Mulai</th>
                           <th>Tanggal Expired</th>
+                          <th>Nota</th>
                         </tr>
                         <?php $no = 1; ?>
                         <?php foreach ($datahistori as $key => $value) { ?>
@@ -151,18 +151,20 @@ tr:nth-child(even) {
                             <!-- <td><?= $value['jenisBayar'] ?></td> -->
                             <td><?= $value['metodebayar'] ?></td>
                             <td>
-                              <?php $jmlBulan = ($value['durasiMember']/30); ?>
+                              <?php $jmlBulan = $value['durasiMember'] / 30; ?>
                               <?php if ($jmlBulan > 1) { ?>
-                                <?= ($value['harga'] * $jmlBulan) - (($value['harga'] * $jmlBulan) * 0.1) ?>
+                                <?= $value['harga'] * $jmlBulan - $value['harga'] * $jmlBulan * 0.1 ?>
                               <?php } else { ?>
                                 <?= $value['harga'] * $jmlBulan ?>
                               <?php } ?>
                             </td>
                             <td><?= $value['tanggalMulai'] ?></td>
                             <td><?= $value['tanggalSelesai'] ?></td>
+                            <td><a href="<?= base_url() . '?/DaftarMember/cetak_nota/' . $value['id'] ?>">
+                                                            <i class="bx bx-detail text-success "></i>
+                                                        </a></td>
                           </tr>
-                        <?php $no++;
-                        } ?>
+                        <?php $no++;} ?>
                         
                       </table>
                       </div>

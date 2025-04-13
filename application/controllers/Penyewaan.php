@@ -105,21 +105,6 @@ class Penyewaan extends CI_Controller
                 '/idkategori/' .
                 $id_kategori_olahraga
         );
-
-        // $id_kategori_olahraga = $this->input->post('id_kategori_olahraga');
-        // $id_lapangan = $this->input->post('id_lapangan');
-        // $status_transaksi = "Draft";
-
-        // #form to array
-        // $simpan_data=array(
-        //     'id_kategori_olahraga' => $id_kategori_olahraga,
-        //     'id_lapangan' => $id_lapangan,
-        //     'id_transaksi' => $id_transaksi,
-        //     'status_transaksi' => $status_transaksi,
-        // );
-
-        // #send to model
-        // $this->M_penyewaan->insert_data_pilih_lapangan($simpan_data, $id_transaksi);
     }
 
     #untuk menapilkan info member
@@ -129,37 +114,6 @@ class Penyewaan extends CI_Controller
         $data = $this->M_penyewaan->get_info_member($id);
         echo json_encode($data);
     }
-
-    #function untuk ambil inputan form untuk update data
-    // public function update_data_penyewaan()
-    // {
-    //     #input text form
-    //     $id_transaksi = $this->uri->segment('4');
-    //     $tanggal = $this->input->post('tanggal');
-    //     $nama_pelanggan = $this->input->post('nama_pelanggan');
-    //     $no_telepon = $this->input->post('no_telepon');
-    //     $id_member = $this->input->post('id_member');
-    //     $diskon = $this->input->post('diskon');
-    //     if ($id_member == 'NONMEMBER') {
-    //         $member = 'Tidak';
-    //     } else {
-    //         $member = 'Ya';
-    //     }
-
-    //     #form to array
-    //     $simpan_data = [
-    //         'tanggal' => $tanggal[0],
-    //         'nama_pelanggan' => $nama_pelanggan,
-    //         'no_telepon' => $no_telepon,
-    //         'id_member' => $id_member,
-    //         'member' => $member,
-    //         'diskon' => $diskon,
-    //     ];
-
-    //     #send to model
-    //     $this->M_penyewaan->update_data_tanggal($id_transaksi, $tanggal);
-    //     $this->M_penyewaan->update_data_penyewaan($id_transaksi, $simpan_data);
-    // }
 
     public function update_data_penyewaan()
     {
