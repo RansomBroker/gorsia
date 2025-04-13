@@ -1,51 +1,58 @@
 <?php
-include_once 'v_user_config.php';
-?>
+include_once 'v_user_config.php'; ?>
 
 
-<?php 
+<?php if ($this->uri->segment('2') == 'filterpencarian') {
+    $param_id_akun = $this->input->post('txt_id_akun');
+    $param_tahun = $this->input->post('txt_tahun');
+    $param_bulan = $this->input->post('txt_periode');
+    $param_periode = $param_tahun . $param_bulan;
 
-if ($this->uri->segment('2')=="filterpencarian"){
+    $rows_akun_pr = $this->db
+        ->query("SELECT * FROM kode_akuntansi where id_kode_akuntansi='" . $param_id_akun . "'")
+        ->row_array();
+    $param_kode_akun = $rows_akun_pr['kode_akun'];
+    $param_nama_akun = $rows_akun_pr['nama_akun'];
 
-$param_id_akun = $this->input->post('txt_id_akun');
-$param_tahun = $this->input->post('txt_tahun');
-$param_bulan = $this->input->post('txt_periode');
-$param_periode = $param_tahun.$param_bulan;
+    #saldo awal akun
+    $rows_saldo_awal = $this->db
+        ->query(
+            "SELECT sum(debet) as jumlah_debet, SUM(kredit) as jumlah_kredit FROM jurnal_umum INNER JOIN jurnal_umum_detail ON jurnal_umum.no_bukti=jurnal_umum_detail.no_bukti where id_kode_akuntansi='" .
+                $param_id_akun .
+                "' AND jurnal_umum.periode<'" .
+                $param_periode .
+                "' GROUP BY id_kode_akuntansi"
+        )
+        ->row_array();
+    $jumlah_debet = $rows_saldo_awal['jumlah_debet'];
+    $jumlah_kredit = $rows_saldo_awal['jumlah_kredit'];
+    $saldo_awal = $jumlah_debet - $jumlah_kredit;
 
-$rows_akun_pr = $this->db->query("SELECT * FROM kode_akuntansi where id_kode_akuntansi='".$param_id_akun."'")->row_array();
-$param_kode_akun=$rows_akun_pr['kode_akun'];
-$param_nama_akun=$rows_akun_pr['nama_akun'];
+    #mutasi
+    $rows_mutasi = $this->db
+        ->query(
+            "SELECT sum(debet) as jumlah_debet, SUM(kredit) as jumlah_kredit FROM jurnal_umum INNER JOIN jurnal_umum_detail ON jurnal_umum.no_bukti=jurnal_umum_detail.no_bukti where id_kode_akuntansi='" .
+                $param_id_akun .
+                "' AND jurnal_umum.periode='" .
+                $param_periode .
+                "' GROUP BY id_kode_akuntansi"
+        )
+        ->row_array();
+    $mutasi_jumlah_debet = $rows_mutasi['jumlah_debet'];
+    $mutasi_jumlah_kredit = $rows_mutasi['jumlah_kredit'];
+    $mutasi_saldo = $mutasi_jumlah_debet - $mutasi_jumlah_kredit;
 
-#saldo awal akun
-$rows_saldo_awal = $this->db->query("SELECT sum(debet) as jumlah_debet, SUM(kredit) as jumlah_kredit FROM jurnal_umum INNER JOIN jurnal_umum_detail ON jurnal_umum.no_bukti=jurnal_umum_detail.no_bukti where id_kode_akuntansi='".$param_id_akun."' AND jurnal_umum.periode<'".$param_periode."' GROUP BY id_kode_akuntansi")->row_array();
-$jumlah_debet=$rows_saldo_awal['jumlah_debet'];
-$jumlah_kredit=$rows_saldo_awal['jumlah_kredit'];
-$saldo_awal = $jumlah_debet - $jumlah_kredit;
+    $saldo_akhir = $saldo_awal + $mutasi_saldo;
+} else {
+    $param_id_akun = '';
+    $param_tahun = '';
+    $param_bulan = '';
+    $param_periode = '';
 
-#mutasi
-$rows_mutasi = $this->db->query("SELECT sum(debet) as jumlah_debet, SUM(kredit) as jumlah_kredit FROM jurnal_umum INNER JOIN jurnal_umum_detail ON jurnal_umum.no_bukti=jurnal_umum_detail.no_bukti where id_kode_akuntansi='".$param_id_akun."' AND jurnal_umum.periode='".$param_periode."' GROUP BY id_kode_akuntansi")->row_array();
-$mutasi_jumlah_debet=$rows_mutasi['jumlah_debet'];
-$mutasi_jumlah_kredit=$rows_mutasi['jumlah_kredit'];
-$mutasi_saldo = $mutasi_jumlah_debet - $mutasi_jumlah_kredit;
-
-$saldo_akhir = $saldo_awal + $mutasi_saldo;
-
-}
-
-else {
-    $param_id_akun ="";
-    $param_tahun ="";
-    $param_bulan ="";
-    $param_periode ="";
-
-    $saldo_awal= 0 ;
+    $saldo_awal = 0;
     $mutasi_saldo = 0;
     $saldo_akhir = 0;
-
-}
-
-
-?>
+} ?>
 
 <!DOCTYPE html>
 
@@ -149,7 +156,7 @@ data-template="vertical-menu-template-free"
 
                                <div class="row">
                                     <div class="col-sm-6 col-xs-12">
-                                        <?php echo form_open_multipart(site_url().'?/BukuBesar/filterpencarian'); ?>
+                                        <?php echo form_open_multipart(site_url() . '?/BukuBesar/filterpencarian'); ?>
 
 
                                         <div class="form-group row">
@@ -158,13 +165,13 @@ data-template="vertical-menu-template-free"
 
 
                                                 <select class="form-select" style="width: 100%" name="txt_id_akun" id="txt_id_akun" required=""  >
-                                                    <?php if($this->uri->segment('2')=="filterpencarian") { 
+                                                    <?php if ($this->uri->segment('2') == 'filterpencarian') {
                                                         print "<option value='$param_id_akun'>$param_kode_akun - $param_nama_akun</option>";
                                                     } ?>
 
                                                     <option value=""> - - - - Pilih - - - - </option>
-                                                    <?php foreach($get_all_data_akun as $row) {  
-                                                        $id_kode_akuntansi_cb= $row->id_kode_akuntansi;
+                                                    <?php foreach ($get_all_data_akun as $row) {
+                                                        $id_kode_akuntansi_cb = $row->id_kode_akuntansi;
                                                         $kode_akun_cb = $row->kode_akun;
                                                         $nama_akun_cb = $row->nama_akun;
                                                         print "<option value='$id_kode_akuntansi_cb'>$kode_akun_cb - $nama_akun_cb</option>";
@@ -181,12 +188,12 @@ data-template="vertical-menu-template-free"
 
 
                                                 <select class="form-select" style="width: 100%" name="txt_tahun" id="txt_tahun" required=""  >
-                                                    <?php if($this->uri->segment('2')=="filterpencarian") { 
+                                                    <?php if ($this->uri->segment('2') == 'filterpencarian') {
                                                         print "<option value='$param_tahun'>$param_tahun</option>";
                                                     } ?>
                                                     <option value=""> - - - - Pilih Tahun - - - - </option>
-                                                    <?php for ($i=2023; $i <= date('Y') ; $i++) { 
-                                                         print "<option value='$i'>$i</option>";
+                                                    <?php for ($i = 2023; $i <= date('Y'); $i++) {
+                                                        print "<option value='$i'>$i</option>";
                                                     } ?>
                                                 </select>
 
@@ -200,7 +207,7 @@ data-template="vertical-menu-template-free"
 
 
                                                 <select class="form-select" style="width: 100%" name="txt_periode" id="txt_periode" required=""  >
-                                                    <?php if($this->uri->segment('2')=="filterpencarian") { 
+                                                    <?php if ($this->uri->segment('2') == 'filterpencarian') {
                                                         print "<option value='$param_bulan'>$param_bulan</option>";
                                                     } ?>
                                                     <option value=""> - - - - Pilih Periode - - - - </option>
@@ -244,7 +251,9 @@ data-template="vertical-menu-template-free"
                                             <label class="col-4 col-form-label"><font style="font-size: 14px"></font></label>
                                             <label class="col-5 col-form-label" align="right"><b>Saldo Awal</b></label>
                                             <div class="col-2" align="left">
-                                                <input type="text" name="txt_saldo_awal" id="txt_saldo_awal" value="<?= number_format($saldo_awal); ?>" readonly>
+                                                <input type="text" name="txt_saldo_awal" id="txt_saldo_awal" value="<?= number_format(
+                                                    $saldo_awal
+                                                ) ?>" readonly>
 
                                             </div>
                                         </div>
@@ -265,55 +274,75 @@ data-template="vertical-menu-template-free"
                                           </tr>
                             </thead>
                            
-                            <?php 
+                            <?php if ($this->uri->segment('2') == 'filterpencarian') {
+                                $no = 0;
+                                foreach ($get_all_buku_besar as $row) {
+                                    $no++;
 
-                                          if($this->uri->segment('2')=="filterpencarian") { 
+                                    $id_jurnal = $row->id_jurnal;
+                                    $periode = $row->periode;
+                                    $no_bukti = $row->no_bukti;
+                                    $tanggal = $row->tanggal;
+                                    $no_referensi = $row->no_referensi;
+                                    $dari = $row->dari;
+                                    $kepada = $row->kepada;
+                                    $keterangan = $row->keterangan;
 
+                                    $id_akun_perkiraan = $row->id_kode_akuntansi;
+                                    $uraian = $row->uraian;
+                                    $debet = $row->debet;
+                                    $kredit = $row->kredit;
 
-                                          $no=0;
-                                     foreach($get_all_buku_besar as $row) {    
-                                      $no++; 
+                                    $rows_akun = $this->db
+                                        ->query(
+                                            "SELECT * FROM kode_akuntansi where id_kode_akuntansi='" .
+                                                $id_akun_perkiraan .
+                                                "'"
+                                        )
+                                        ->row_array();
+                                    $kode_akun = $rows_akun['kode_akun'];
+                                    $nama_akun = $rows_akun['nama_akun'];
+                                    $saldo_normal = $rows_akun['saldo_normal'];
 
-                                      $id_jurnal = $row->id_jurnal;
-                                      $periode= $row->periode;
-                                      $no_bukti= $row->no_bukti;
-                                      $tanggal= $row->tanggal;
-                                      $no_referensi= $row->no_referensi;
-                                      $dari= $row->dari;
-                                      $kepada= $row->kepada;
-                                      $keterangan= $row->keterangan;
+                                    if ($no % 2 == 0) {
+                                        $class_baris = "class='odd gradeX'";
+                                    } else {
+                                        $class_baris = "class='even gradeC'";
+                                    }
 
-                                      $id_akun_perkiraan= $row->id_kode_akuntansi;
-                                      $uraian= $row->uraian;
-                                      $debet= $row->debet;
-                                      $kredit= $row->kredit;
-
-                                      $rows_akun = $this->db->query("SELECT * FROM kode_akuntansi where id_kode_akuntansi='".$id_akun_perkiraan."'")->row_array();
-                                      $kode_akun=$rows_akun['kode_akun'];
-                                      $nama_akun=$rows_akun['nama_akun'];
-                                      $saldo_normal=$rows_akun['saldo_normal'];
-                                     
-
-                                       if($no % 2 == 0) {$class_baris="class='odd gradeX'";}
-                                      else {$class_baris="class='even gradeC'";}
-                                            
-                                        echo '<tr role="row" '.$class_baris.'>
-                                                <td class="sorting_1">'.$no.'</td>
-                                                <td>'.$kode_akun.' - '.$nama_akun.'</td>
-                                                <td>'.date('d/m/Y', strtotime($tanggal)).'</td>
-                                                <td>'.$uraian.'</td>
-                                                <td>'.number_format($debet).'</td>
-                                                <td>'.number_format($kredit).'</td>
-                                                <td><a href="'.site_url().'?/TransaksiJurnal/viewer/no/'.$no_bukti.'" target="_blank"><i class="bx bx-folder-open"></i> Buka </a></td>
+                                    echo '<tr role="row" ' .
+                                        $class_baris .
+                                        '>
+                                                <td class="sorting_1">' .
+                                        $no .
+                                        '</td>
+                                                <td>' .
+                                        $kode_akun .
+                                        ' - ' .
+                                        $nama_akun .
+                                        '</td>
+                                                <td>' .
+                                        date('d/m/Y', strtotime($tanggal)) .
+                                        '</td>
+                                                <td>' .
+                                        $uraian .
+                                        '</td>
+                                                <td>' .
+                                        number_format($debet) .
+                                        '</td>
+                                                <td>' .
+                                        number_format($kredit) .
+                                        '</td>
+                                                <td><a href="' .
+                                        site_url() .
+                                        '?/TransaksiJurnal/viewer/no/' .
+                                        $no_bukti .
+                                        '" target="_blank"><i class="bx bx-folder-open"></i> Buka </a></td>
                                                 
                                                
                                         </tr>';
-
-                                        } 
-
-                                    }
-
-                                        ?>
+                                }
+                            } ?>
 
                                         </tbody>
                                     </table>
@@ -328,7 +357,9 @@ data-template="vertical-menu-template-free"
                                             <label class="col-4 col-form-label"><font style="font-size: 14px"></font></label>
                                             <label class="col-5 col-form-label" align="right"><b>Saldo Akhir</b></label>
                                             <div class="col-2" align="left">
-                                                <input type="text" name="txt_saldo_akhir" id="txt_saldo_akhir" value="<?= number_format($saldo_akhir); ?>" readonly>
+                                                <input type="text" name="txt_saldo_akhir" id="txt_saldo_akhir" value="<?= number_format(
+                                                    $saldo_akhir
+                                                ) ?>" readonly>
 
                                             </div>
                                         </div>
