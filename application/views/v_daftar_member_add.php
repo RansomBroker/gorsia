@@ -210,6 +210,7 @@ include_once 'v_user_config.php'; ?>
             </div>
             <div class="modal-body">
             <p><strong>Nama Member:</strong> <span id="popup_nama"></span></p>
+            <p><strong>No HP:</strong> <span id="popup_nohp"></span></p>
             <p><strong>Durasi Pembayaran:</strong> <span id="popup_durasi"></span> hari</p>
             <p><strong>Tanggal Expired:</strong> <span id="popup_expired"></span></p>
             <p><strong>Diskon:</strong> <span id="popup_diskon"></span></p>
@@ -217,6 +218,7 @@ include_once 'v_user_config.php'; ?>
 
             <!-- Hidden input untuk meneruskan data ke controller -->
             <input type="hidden" name="paketID" id="paketID_final">
+            <input type="hidden" name="nope" id="nope_final">
             <input type="hidden" name="metode_bayar" id="metode_bayar_final">
             <input type="hidden" name="durasi_member" id="durasi_member_final">
             <input type="hidden" name="tanggal_mulai" id="tanggal_mulai_final">
@@ -313,83 +315,87 @@ include_once 'v_user_config.php'; ?>
     </script>
 
     <script type="text/javascript">
-        // Fungsi untuk menambahkan bulan pada tanggal
         function addMonths(date, months) {
-        var d = new Date(date);
-        var day = d.getDate();
-        d.setMonth(d.getMonth() + months);
-        // Jika bulan baru tidak memiliki tanggal yang sama, set ke tanggal terakhir di bulan tersebut
-        if (d.getDate() < day) {
-            d.setDate(0);
-        }
-        return d;
+            var d = new Date(date);
+            var day = d.getDate();
+            d.setMonth(d.getMonth() + months);
+            if (d.getDate() < day) {
+                d.setDate(0);
+            }
+            return d;
         }
 
         $("#formdetailmember").submit(function(e) {
-            e.preventDefault();  // Cegah submit form secara default
+            e.preventDefault();
 
-            // Ambil data dari form
-            const nama = $("#nama").val();  // Nama member dari form pendaftaran
+            const nama = $("#nama").val();
+            const nohp = $("#nope").val();
             const durasiValue = $("#durasi_member").val();
             const tanggalMulaiVal = $("#tanggal_mulai").val();
-            if (!tanggalMulaiVal) {
-            alert("Tanggal Mulai harus diisi");
-            return;
-            }
-            const tanggalMulai = new Date(tanggalMulaiVal);
-            
-            let tanggalExpired, computedDurasiDays, displayDuration;
 
-            // Jika durasi dipilih "6" (6 Bulan)
+            if (!tanggalMulaiVal) {
+                alert("Tanggal Mulai harus diisi");
+                return;
+            }
+
+            const tanggalMulai = new Date(tanggalMulaiVal);
+            let tanggalExpired, computedDurasiDays, displayDuration, bulan;
+
             if (durasiValue === "6") {
-                // Hitung expired dengan menambahkan 6 bulan ke tanggal mulai
                 tanggalExpired = addMonths(tanggalMulai, 6);
-                // Hitung jumlah hari antara tanggal mulai dan tanggal expired
                 const diffTime = tanggalExpired - tanggalMulai;
                 computedDurasiDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 displayDuration = "6 Bulan";
+                bulan = 6;
             } else {
-                // Anggap nilai lain merupakan jumlah hari, misalnya 30, 60, 90
                 computedDurasiDays = parseInt(durasiValue);
                 tanggalExpired = new Date(tanggalMulai);
                 tanggalExpired.setDate(tanggalMulai.getDate() + computedDurasiDays);
                 displayDuration = computedDurasiDays + " hari";
+                bulan = computedDurasiDays / 30; // 30 hari dianggap 1 bulan
             }
-            
-            // Format tanggal expired ke format YYYY-MM-DD
+
             const expiredStr = tanggalExpired.toISOString().split('T')[0];
-
-            // Ambil harga paket dari opsi select (pastikan option memiliki atribut data-harga)
             const selectedPaket = $("#paketID option:selected");
-            const harga = parseInt(selectedPaket.data("harga")) || 0;
+            const hargaPaket = parseInt(selectedPaket.data("harga")) || 0;
 
-            // Tidak ada diskon untuk semua durasi
-            const diskon = 0;
-            const total = harga - diskon;
+            const hargaTotal = hargaPaket * bulan;
 
-            // Isi data di modal untuk ditampilkan sebagai konfirmasi
+            let diskon = 0;
+            let diskonPersen = 0;
+
+            if (bulan === 2 || bulan === 3) {
+                diskonPersen = 10;
+                diskon = Math.floor(hargaTotal * 0.10);
+            }
+
+            const total = hargaTotal - diskon;
+
+            // Tampilkan ke modal konfirmasi
             $("#popup_nama").text(nama);
+            $("#popup_nohp").text(nohp);
             $("#popup_durasi").text(displayDuration);
             $("#popup_expired").text(expiredStr);
-            $("#popup_diskon").text("Rp " + diskon.toLocaleString());
+            $("#popup_diskon").text(diskonPersen > 0 ? `10% (Rp ${diskon.toLocaleString()})` : "Rp 0");
             $("#popup_totalbayar").text("Rp " + total.toLocaleString());
 
-            // Isi nilai hidden input di modal supaya data ikut ter-submit ke controller
+            // Hidden field untuk controller
             $("#paketID_final").val($("#paketID").val());
             $("#metode_bayar_final").val($("input[name='metode_bayar']:checked").val());
-            // Gunakan computedDurasiDays agar controller menghitung expired yang sama
             $("#durasi_member_final").val(computedDurasiDays);
             $("#tanggal_mulai_final").val(tanggalMulaiVal);
             $("#idSimpan_final").val($("#idSimpan").val());
             $("#tanggal_expired_final").val(expiredStr);
             $("#diskon_final").val(diskon);
             $("#total_bayar_final").val(total);
+            $("#nope_final").val(nohp);
 
-            // Tampilkan modal konfirmasi
+            // Tampilkan modal
             $("#confirmModal").modal('show');
         });
-
     </script>
+
+
 
 </body>
 
