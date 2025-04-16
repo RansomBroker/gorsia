@@ -19,7 +19,7 @@ data-template="vertical-menu-template-free"
   content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
   />
 
-  <title>Gorsia - Daftar Pengeluaran</title>
+  <title>Gorsia - Daftar Jurnal</title>
 
   <meta name="description" content="" />
 
@@ -68,9 +68,9 @@ data-template="vertical-menu-template-free"
           <?php include_once 'v_navbar.php'; ?>
           <div class="content-wrapper">
             <div class="container-xxl flex-grow-1 container-p-y">
-              <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Transaksi /</span> Daftar Pengeluaran</h4>
+              <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Transaksi /</span> Daftar Jurnal Lain</h4>
               <div class="card" >
-                    <h5 class="card-header">Daftar Pengeluaran</h5>
+                    <h5 class="card-header">Daftar Jurnal Lain</h5>
                 <div id="notifications">
                   <?php echo $this->session->flashdata('msg'); ?>
                 </div>
@@ -84,7 +84,7 @@ data-template="vertical-menu-template-free"
                       $tahun = date('Y');
                   }
                   ?>
-                  <form action="<?= site_url() ?>/Pengeluaran/filter"  method="GET">
+                  <form action="<?= site_url() ?>/Jurnal/filter"  method="GET">
                       <div class="row mb-3">
                           <div class="col-md-2">
                               <label for="periode" class="form-label">Periode (Bulan)</label>
@@ -139,8 +139,8 @@ data-template="vertical-menu-template-free"
                           </div>
                           <div class="col-md-4 d-flex gap-3 align-items-end justify-content-end">
                               <button type="submit" class="btn btn-primary" id="filter_btn">Filter</button>
-                              <a href="<?= site_url() ?>/Pengeluaran" class="btn btn-secondary" id="reset_btn">Reset</a>
-                              <a href="<?= site_url() ?>?/Pengeluaran/create" class="btn btn-primary" style="float: right;">
+                              <a href="<?= site_url() ?>/Jurnal" class="btn btn-secondary" id="reset_btn">Reset</a>
+                              <a href="<?= site_url() ?>?/Jurnal/create" class="btn btn-primary" style="float: right;">
                                 <span class="tf-icons bx bx-plus-medical"></span>&nbsp; Tambah
                               </a>
                           </div>
@@ -170,7 +170,7 @@ data-template="vertical-menu-template-free"
                         <?php $rows_detail = $this->db
                             ->query(
                                 "
-                            SELECT COALESCE(ka_debet.nama_akun,ka_kredit.nama_akun) AS nama_akun FROM transaksi_pengeluaran_detil tpd
+                            SELECT COALESCE(ka_debet.nama_akun,ka_kredit.nama_akun) AS nama_akun FROM transaksi_jurnal_detil tpd
                             LEFT JOIN kode_akuntansi AS ka_debet ON tpd.id_kode_akun_debet = ka_debet.id_kode_akuntansi
                             LEFT JOIN kode_akuntansi AS ka_kredit ON tpd.id_kode_akun_kredit = ka_kredit.id_kode_akuntansi
                             where tpd.no_transaksi='" .
@@ -189,9 +189,9 @@ data-template="vertical-menu-template-free"
                       <td><?= $key['status_transaksi'] ?></td>
                       <td>
                         <a class="btn btn-primary text-white" href="<?php echo base_url() .
-                            "?/Pengeluaran/edit/$key[id]"; ?>"><i class="bx bx-edit me-2"></i> </a>
+                            "?/Jurnal/edit/$key[id]"; ?>"><i class="bx bx-edit me-2"></i> </a>
                         <!-- <a class="btn btn-danger text-white" href="<?php echo base_url() .
-                            "?/Pengeluaran/delete/$key[id]"; ?>"><i class="bx bx-trash me-2"></i> </a> -->
+                            "?/Jurnal/delete/$key[id]"; ?>"><i class="bx bx-trash me-2"></i> </a> -->
                       </td>
                     </tr>
                     <?php $no++;} ?>

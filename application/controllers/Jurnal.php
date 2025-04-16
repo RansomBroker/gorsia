@@ -1,7 +1,7 @@
 <?php
 include 'timezone.php';
 
-class Pengeluaran extends CI_Controller
+class Jurnal extends CI_Controller
 {
     function __construct()
     {
@@ -9,11 +9,13 @@ class Pengeluaran extends CI_Controller
         #memuat pengenalan database
         $this->load->database();
 
+        $this->load->library('auth_lib');
+
         #memuat pengenalan helper url
         $this->load->helper(['form', 'url']);
 
         #memuat pengenalan model
-        $this->load->model('M_transaksi_pengeluaran');
+        $this->load->model('M_jurnal_transaksi');
         $this->load->model('M_kode_akuntansi');
 
         #cek kondisi sesion login
@@ -22,45 +24,35 @@ class Pengeluaran extends CI_Controller
         }
     }
 
-    #menampilkan halaman utama controller
     public function index()
     {
-        #cek hak akses
-        $rows = $this->db->query("SELECT * FROM user where username='" . $this->session->username . "'")->row_array();
-        $hak_akses = $rows['hak_akses'];
+        // Dapatkan hak akses user, jika diperlukan
+        $hak_akses = $this->auth_lib->getHakAkses();
+        // Dapatkan status menu master dari hak akses user
+        $status_menu = $this->auth_lib->getMenuStatus();
 
-        #cek akses menu
-        $rows_hakpengguna = $this->db
-            ->query("SELECT * FROM hak_akses where hak_akses='" . $hak_akses . "'")
-            ->row_array();
-        $status_menu = $rows_hakpengguna['menu_master'];
-
-        #kondisi akses & menu
         if ($hak_akses != null && $status_menu == 'Aktif') {
-            //   $data = array('get_all_member' => $this->M_member->get_all_member());
-            $data = $this->M_transaksi_pengeluaran->getAll();
-            $this->load->view('v_transaksi_pengeluaran', ['dataMember' => $data]);
+            $data = $this->M_jurnal_transaksi->getAll();
+            $this->load->view('v_jurnal_transaksi', ['dataMember' => $data]);
         } else {
             redirect(site_url() . '?/Login');
         }
-    } #end function index
+    }
     public function create()
     {
-        $no_transaksi = 'PRCH' . date('dmyHis');
+        $no_transaksi = 'JRNL' . date('dmyHis');
         $data = [
             'no_transaksi' => $no_transaksi,
-            'get_all_akun' => $this->M_kode_akuntansi->get_all_akun_by_kode_parent(81),
-            'get_all_kode_parent' => $this->M_kode_akuntansi->get_all_akun_by_level(2),
+            'get_all_akun' => $this->M_kode_akuntansi->get_all_akun(),
+            'get_all_kode_child' => $this->M_kode_akuntansi->get_all_akun_child(),
         ];
-        // var_dump($dariDB);
-        // die;
 
-        $this->load->view('v_transaksi_pengeluaran_add', $data);
+        $this->load->view('v_jurnal_transaksi_add', $data);
     }
+
     public function store()
     {
-        //masukkan ke transaksi pengeluaran
-        $simpan = $this->M_transaksi_pengeluaran->simpanData();
+        $simpan = $this->M_jurnal_transaksi->simpanData();
 
         if ($simpan) {
             $no_transaksi = $_POST['no_transaksi'];
@@ -73,7 +65,7 @@ class Pengeluaran extends CI_Controller
 
             $periode = date('Ym', strtotime($_POST['tanggal']));
             $dari = $_SESSION['username'];
-            $kepada = 'Pengeluaran';
+            $kepada = 'Pengeluaran (Jurnal)';
             $created_at = date('Y-m-d H:i:s');
             $user_created = $this->session->username;
 
@@ -101,7 +93,7 @@ class Pengeluaran extends CI_Controller
                 'created_at' => $created_at,
             ];
             #send to model
-            $this->M_transaksi_pengeluaran->insert_data_jurnal($simpan_data_jurnal, $no_bukti);
+            $this->M_jurnal_transaksi->insert_data_jurnal($simpan_data_jurnal, $no_bukti);
 
             #baca aturan
             $query_setting_penjualan = $this->db
@@ -127,7 +119,7 @@ class Pengeluaran extends CI_Controller
                 ];
 
                 #pengiriman data ke model untuk insert data Debet
-                $this->M_transaksi_pengeluaran->insert_data_detail_jurnal(
+                $this->M_jurnal_transaksi->insert_data_detail_jurnal(
                     $simpan_data_jurnal_detail,
                     $no_bukti,
                     $no_transaksi
@@ -153,7 +145,7 @@ class Pengeluaran extends CI_Controller
                 ];
 
                 #pengiriman data ke model untuk insert data Kredit
-                $this->M_transaksi_pengeluaran->insert_data_detail_jurnal(
+                $this->M_jurnal_transaksi->insert_data_detail_jurnal(
                     $simpan_data_jurnal_detail,
                     $no_bukti,
                     $no_transaksi
@@ -161,51 +153,48 @@ class Pengeluaran extends CI_Controller
             }
         }
 
-        redirect(site_url() . '?/Pengeluaran');
+        redirect(site_url() . '?/Jurnal');
     }
 
-    public function show($id)
-    {
-        $data = $this->M_transaksi_pengeluaran->editData($id);
-        $this->load->view('v_transaksi_pengeluaran_show', ['data' => $data]);
-    }
     public function edit($id)
     {
-        $pengeluaran = $this->M_transaksi_pengeluaran->editData($id);
+        $pengeluaran = $this->M_jurnal_transaksi->editData($id);
         $data = [
             'data' => $pengeluaran,
-            'get_all_akun' => $this->M_kode_akuntansi->get_all_akun_by_kode_parent(81),
-            'get_all_kode_parent' => $this->M_kode_akuntansi->get_all_akun_by_level(2),
+            'get_all_akun' => $this->M_kode_akuntansi->get_all_akun(),
+            'get_all_kode_child' => $this->M_kode_akuntansi->get_all_akun_child(),
         ];
-        $this->load->view('v_transaksi_pengeluaran_edit', $data);
-        // var_dump($data->nomor_member);
-        // die;
+        $this->load->view('v_jurnal_transaksi_edit', $data);
     }
-    public function update($id)
-    {
-        $this->M_transaksi_pengeluaran->updateData($id);
-        redirect(base_url('?/Pengeluaran'));
-    }
-    public function void($id)
-    {
-        $rows = $this->db->query("SELECT * FROM transaksi_pengeluaran where id='" . $id . "'")->row_array();
-        $no_transaksi = $rows['no_transaksi'];
-        $rows_jurnal = $this->db
-            ->query("SELECT * FROM jurnal_umum where no_referensi='" . $no_transaksi . "'")
-            ->row_array();
-        $no_bukti_jurnal = $rows_jurnal['no_bukti'];
-        $this->M_transaksi_pengeluaran->voidData($no_transaksi, $no_bukti_jurnal);
-    }
+
     public function delete($id)
     {
-        $rows = $this->db->query("SELECT * FROM transaksi_pengeluaran where id='" . $id . "'")->row_array();
+        $rows = $this->db->query("SELECT * FROM transaksi_jurnal where id='" . $id . "'")->row_array();
         $no_transaksi = $rows['no_transaksi'];
         $rows_jurnal = $this->db
             ->query("SELECT * FROM jurnal_umum where no_referensi='" . $no_transaksi . "'")
             ->row_array();
         $no_bukti_jurnal = $rows_jurnal['no_bukti'];
-        $this->M_transaksi_pengeluaran->deleteData($no_transaksi, $no_bukti_jurnal);
+        $this->M_jurnal_transaksi->deleteData($no_transaksi, $no_bukti_jurnal);
     }
+
+    public function update($id)
+    {
+        $this->M_jurnal_transaksi->updateData($id);
+        redirect(base_url('?/Jurnal'));
+    }
+
+    public function void($id)
+    {
+        $rows = $this->db->query("SELECT * FROM transaksi_jurnal where id='" . $id . "'")->row_array();
+        $no_transaksi = $rows['no_transaksi'];
+        $rows_jurnal = $this->db
+            ->query("SELECT * FROM jurnal_umum where no_referensi='" . $no_transaksi . "'")
+            ->row_array();
+        $no_bukti_jurnal = $rows_jurnal['no_bukti'];
+        $this->M_jurnal_transaksi->voidData($no_transaksi, $no_bukti_jurnal);
+    }
+
     public function filter()
     {
         $periode = $this->input->get('periode');
@@ -213,11 +202,7 @@ class Pengeluaran extends CI_Controller
         $status = $this->input->get('status');
 
         $data = [
-            'dataMember' => $this->M_transaksi_pengeluaran->get_all_pengeluaran_by_month_year(
-                $periode,
-                $tahun,
-                $status
-            ),
+            'dataMember' => $this->M_jurnal_transaksi->get_all_pengeluaran_by_month_year($periode, $tahun, $status),
             'periode' => $periode,
             'tahun' => $tahun,
             'status' => $status,
@@ -226,3 +211,4 @@ class Pengeluaran extends CI_Controller
         $this->load->view('v_transaksi_pengeluaran', $data);
     }
 }
+?>
