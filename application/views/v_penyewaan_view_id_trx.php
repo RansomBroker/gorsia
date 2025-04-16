@@ -396,17 +396,22 @@ data-template="vertical-menu-template-free"
 
                       $rows_cek = $this->db
                           ->query(
-                              "SELECT * FROM transaksi_sewa_detil 
-                      JOIN transaksi_sewa ON transaksi_sewa_detil.id_transaksi=transaksi_sewa.id_transaksi 
-                      where transaksi_sewa_detil.id_jadwal_sesi='" .
+                              "SELECT *
+         FROM transaksi_sewa_detil tsd
+         JOIN transaksi_sewa ts ON tsd.id_transaksi = ts.id_transaksi
+         WHERE tsd.id_jadwal_sesi = '" .
                                   $id_jadwal_sesi .
-                                  "' 
-                      AND transaksi_sewa.status_transaksi != 'Cancel'
-                      AND transaksi_sewa.tanggal='" .
+                                  "'
+           AND ts.status_transaksi != 'Cancel'
+           AND ts.tanggal = '" .
                                   $tanggal_view .
+                                  "'
+           AND ts.id_lapangan = '" .
+                                  $id_lapangan .
                                   "'"
                           )
                           ->row_array();
+
                       $id_transaksi_detil_cek = $rows_cek['id_transaksi_detil'];
 
                       if (isset($id_transaksi_detil_cek)) {
